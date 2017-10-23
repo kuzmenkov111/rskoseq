@@ -1,5 +1,6 @@
 #' Create directory for RNA-seq pipeline
-#' @description Create Project directories for RNA-seq pipeline using hisat2-stringtie
+#' @description Create Project directories for RNA-seq pipeline using hisat2-stringtie.
+#'    Then fastq files move to './project/fastq'　directory, followning execution of 'rskoseq::rep_hisat2', for read mapping using hisat2.
 #' @usage dir_template(prj)
 #' @param prj character: path of a project name
 #' @examples #
@@ -32,5 +33,4 @@ dir_template <- function(prj){
   )
   cat(com)
   system(com)
-
 }
