@@ -10,10 +10,22 @@ dir_template(prj)
 \item{prj}{character: path of a project name}
 }
 \description{
-Create directory for RNA-seq pipeline using hisat2-stringtie
+Create Project directories for RNA-seq pipeline using hisat2-stringtie.
+   Then fastq files move to './project/fastq'　directory, followning execution of 'rskoseq::rep_hisat2', for read mapping using hisat2.
 }
 \examples{
 #
-dir_template(prj = "~/pub/dat/sampledata/rnseq/project1")
-
+# project_name <- "~/pub/dat/sampledata/rnaseq/project1"
+# dir_template(prj = project_name)
+# system(paste0("tree ", project_name))
+# project1
+# ├── fastq
+# ├── qa
+# ├── res_hisat2
+# │   └── failalign
+# └── res_stringtie
+#     ├── ballgown
+#     ├── gff
+#     └── mgff
+# 8 directories, 0 files
 }

@@ -4,33 +4,43 @@
 #' @usage dir_template(prj)
 #' @param prj character: path of a project name
 #' @examples #
-#' dir_template(prj = "~/pub/dat/sampledata/rnseq/project1")
+#' # project_name <- "~/pub/dat/sampledata/rnaseq/project1"
+#' # dir_template(prj = project_name)
+#' # system(paste0("tree ", project_name))
 #' # project1
 #' # ├── fastq
 #' # ├── qa
 #' # ├── res_hisat2
-#' # │.. ├── failalign
-#' # │.. ├── mat
-#' # │.. └── sortbam
+#' # │   └── failalign
 #' # └── res_stringtie
-#' #    ├── ballgown
-#' #    └── gff
-#' #
-#' # 9 directories, 0 files
+#' #     ├── ballgown
+#' #     ├── gff
+#' #     └── mgff
+#' # 8 directories, 0 files
 #' @export
 dir_template <- function(prj){
-  com <- paste0(
-    "mkdir ", prj, " \\\n",
-    prj, "/fastq ", " \\\n",
-    prj, "/qa ", " \\\n",
-    prj, "/res_hisat2", " \\\n",
-    prj, "/res_hisat2/sortbam ", " \\\n",
-    prj, "/res_hisat2/failalign ", " \\\n",
-    prj, "/res_hisat2/mat ", " \\\n",
-    prj, "/res_stringtie ", " \\\n",
-    prj, "/res_stringtie/ballgown ", " \\\n",
-    prj, "/res_stringtie/gff ", " \\\n"
-  )
-  cat(com)
-  system(com)
+  if (file.exists(prj)){
+    stop(paste0("The directory ", prj, " still exists."))
+  } else {
+    com <- paste0(
+      "mkdir ", prj, " \\\n",
+      prj, "/fastq ", " \\\n",
+      prj, "/qa ", " \\\n",
+      prj, "/res_hisat2", " \\\n",
+      prj, "/res_hisat2/failalign ", " \\\n",
+      prj, "/res_stringtie ", " \\\n",
+      prj, "/res_stringtie/ballgown ", " \\\n",
+      prj, "/res_stringtie/gff ", " \\\n",
+      prj, "/res_stringtie/mgff", " \\\n"
+    )
+    system(com, wait = TRUE)
+    cat(com)
+
+    # command log ----
+    com_log <-  paste0(prj, "/command_log.txt")
+    fc <- file(com_log, "w")
+    writeLines(com, fc)
+    close(fc)
+  }
+
 }
