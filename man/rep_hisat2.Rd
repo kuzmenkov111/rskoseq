@@ -25,11 +25,10 @@ Description
 \examples{
 #
 # # arguments ----
-# prj <- "~/pub/dat/sampledata/rnaseq/project1"
+# project_name <- "~/pub/dat/sampledata/rnaseq/project1"
 # # fqdir <- paste0(prj, "/fastq")
 # # suffix_fq <- ".fastq.gz"
 # idx <- "~/db/index/hisat2_idx/SD0218_11_a_contig01"
-# paired <- FALSE
 # # excution ----
-# rep_hisat2(prj=prj, idx=idx, paired=TRUE, ...="--no-spliced-alignment")
+# rep_hisat2(prj=project_name, idx=idx, paired=TRUE, ...="--no-spliced-alignment")
 }

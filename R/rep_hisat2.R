@@ -9,13 +9,12 @@
 #' @param ... additional hisat2 options. E.g.  "--no-spliced-alignment"
 #' @examples #
 #' # # arguments ----
-#' # prj <- "~/pub/dat/sampledata/rnaseq/project1"
+#' # project_name <- "~/pub/dat/sampledata/rnaseq/project1"
 #' # # fqdir <- paste0(prj, "/fastq")
 #' # # suffix_fq <- ".fastq.gz"
 #' # idx <- "~/db/index/hisat2_idx/SD0218_11_a_contig01"
-#' # paired <- FALSE
 #' # # excution ----
-#' # rep_hisat2(prj=prj, idx=idx, paired=TRUE, ...="--no-spliced-alignment")
+#' # rep_hisat2(prj=project_name, idx=idx, paired=TRUE, ...="--no-spliced-alignment")
 #' @importFrom utils tail
 #' @export
 rep_hisat2 <- function(prj, fqdir=paste0(prj, "/fastq"), suffix_fq=".fastq.gz", idx, paired, ...){

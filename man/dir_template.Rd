@@ -19,6 +19,7 @@ Create Project directories for RNA-seq pipeline using hisat2-stringtie.
 # dir_template(prj = project_name)
 # system(paste0("tree ", project_name))
 # project1
+# ├── command_log.txt
 # ├── fastq
 # ├── qa
 # ├── res_hisat2
@@ -26,6 +27,8 @@ Create Project directories for RNA-seq pipeline using hisat2-stringtie.
 # └── res_stringtie
 #     ├── ballgown
 #     ├── gff
-#     └── mgff
-# 8 directories, 0 files
+#     ├── mgff
+#     └── tab
+# 9 directories, 1 file
+
 }

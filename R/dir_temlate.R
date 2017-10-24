@@ -8,6 +8,7 @@
 #' # dir_template(prj = project_name)
 #' # system(paste0("tree ", project_name))
 #' # project1
+#' # ├── command_log.txt
 #' # ├── fastq
 #' # ├── qa
 #' # ├── res_hisat2
@@ -15,8 +16,10 @@
 #' # └── res_stringtie
 #' #     ├── ballgown
 #' #     ├── gff
-#' #     └── mgff
-#' # 8 directories, 0 files
+#' #     ├── mgff
+#' #     └── tab
+#' # 9 directories, 1 file
+#'
 #' @export
 dir_template <- function(prj){
   if (file.exists(prj)){
@@ -31,7 +34,8 @@ dir_template <- function(prj){
       prj, "/res_stringtie ", " \\\n",
       prj, "/res_stringtie/ballgown ", " \\\n",
       prj, "/res_stringtie/gff ", " \\\n",
-      prj, "/res_stringtie/mgff", " \\\n"
+      prj, "/res_stringtie/mgff", " \\\n",
+      prj, "/res_stringtie/tab", " \\\n"
     )
     system(com, wait = TRUE)
     cat(com)

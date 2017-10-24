@@ -2,9 +2,9 @@
 % Please edit documentation in R/rep_stringtie.R
 \name{rep_stringtie}
 \alias{rep_stringtie}
-\title{Replicate execution of Transcript assembly and quantification for RNA-Seq using stringtie}
+\title{Consecutive execution of Transcript assembly and quantification for RNA-Seq using stringtie}
 \usage{
-rep_stringtie(prj, bam_dir, suffix_bam, guide_gff, res_dir)
+rep_stringtie(prj, bam_dir, suffix_bam, guide_gff, res_dir, ...)
 }
 \arguments{
 \item{prj}{character: project directory path, created by 'rskoseq::dir_template'}
@@ -18,10 +18,10 @@ created by 'rskoseq::dir_template'.}
 
 \item{res_dir}{output directory path, the default is 'paste0(prj, "/res_stringtie")'}
 
-\item{...}{additional options of stringtie.}
+\item{...}{additional options of stringtie. E.g. "-e"}
 }
 \description{
-Description
+Consecutive processiong of stringtie for multi samples, then FPKM and cov data table are created.
 }
 \examples{
 #
