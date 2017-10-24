@@ -25,7 +25,7 @@ rep_hisat2 <- function(prj, fqdir=paste0(prj, "/fastq"), suffix_fq=".fastq.gz", 
   }
   ## argument check: project directory ----
   if(!file.exists(prj)){
-    stop(paste0("\'", prj, "\'", " does not fount."))
+    stop(paste0("\'", prj, "\'", " does not found."))
   }
   ## argument check: hisat2 index  ----
   idx1 <- paste0(idx, ".1.ht2")
@@ -54,6 +54,8 @@ rep_hisat2 <- function(prj, fqdir=paste0(prj, "/fastq"), suffix_fq=".fastq.gz", 
   ## command log ----
   com_log <-  paste0(prj, "/command_log.txt")
   con <- file(com_log, "a")
+  writeLines("# hisat2", con)
+
 
   ## bam, log, and met files must be in the same directory. ----
   for(i in seq_along(r1fqs)){

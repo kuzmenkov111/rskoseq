@@ -89,7 +89,11 @@ rep_stringtie <- function(prj, bam_dir=paste0(prj, "/res_hisat2"), suffix_bam=".
   ## replicate execution ----
   writeLines("# stringtie -eb", con)
   for(i in seq_along(bamfls)){
-    dir.create(res_ballgown[i])
+    ## create ballgown directory
+    if(!file.exists(res_ballgown[i])){
+      dir.create(res_ballgown[i])
+    }
+    ## command of 'stringtie -eb'
     com3 <-
       paste0("stringtie -p 4 ", bamfls[i],
              " -e ",
