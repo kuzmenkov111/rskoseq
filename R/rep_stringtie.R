@@ -1,9 +1,12 @@
 #' Consecutive execution of Transcript assembly and quantification for RNA-Seq using stringtie
-#' @description Consecutive processiong of stringtie for multi samples, then FPKM and cov data table are created.
-#' @usage rep_stringtie(prjd, bam_dir, suffix_bam, guide_gff, res_dir, ...)
+#' @description Consecutive processiong of stringtie for multiple samples, then FPKM and cov data table are created.
+#'    Execution following from 'rskoseq::project_rnsq', 'rskoseq::rep_hisat2'.
+#' @usage rep_stringtie(prjd, alnd ,suffix_bam, guide_gff, res_dir, ...)
 #' @param prjd character: project directory path, created by 'rskoseq::project_rnsq'
-#' @param bam_dir character: The directory path of soreted bam files. The default is paste0(prjd, "/res_hisat2"),
-#'     created by 'rskoseq::project_rnsq'.
+#' @param alnd character: the name of alignment directory, sorted-bam files searched from under this directory.
+#'     the default is "alignment1". If designate your own sorted-bam containing directory, give the path of the directory
+#'     and 'res_dir' must be directory name under the 'alnd'. E.g. alnd= "~/bamdir"; res_dir= "res_stringtie"
+#'
 #' @param suffix_bam character: The default is ".sort.bam".
 #' @param guide_gff The file path of guide gff.
 #' @param res_dir output directory path, the default is 'paste0(prjd, "/res_stringtie")'
@@ -11,10 +14,14 @@
 #' @examples #
 #' # prj <- "~/pub/dat/sampledata/rnaseq/project1"
 #' # guide <- "~/db/index/hisat2_idx/SD0218_11_a_contig01.gff"
-#' # rep_stringtie(prjd=prj, guide_gff=guide)
+#' # bamdir <- "alignment1"
+#' # rep_stringtie(prjd=prj, alnd=bamdir, guide_gff=guide)
 #' @importFrom utils tail write.table read.table
 #' @export
-rep_stringtie <- function(prjd, bam_dir=paste0(prjd, "/res_hisat2"), suffix_bam=".sort.bam", guide_gff, res_dir=paste0(prjd, "/res_stringtie"), ...){
+rep_stringtie <- function(prjd,
+                          alnd = "alignment1",
+                          suffix_bam=".sort.bam", guide_gff,
+                          res_dir=paste0(prjd, "/", alnd, "/res_stringtie"), ...){
   # argument check: stringtie program PATH ----
   if (!any(grep("stringtie", unlist(strsplit(Sys.getenv("PATH"), ":"))))){
     stop("There is not stringtie program, or the PATH does not found.")
@@ -31,14 +38,23 @@ rep_stringtie <- function(prjd, bam_dir=paste0(prjd, "/res_hisat2"), suffix_bam=
   }
 
   # argument check: path of sorted bam files and get all samples name----
+  bam_dir <- paste0(prjd, "/", alnd, "/res_hisat2")
   if (file.exists(bam_dir)){
     bamfls <- list.files(bam_dir, suffix_bam, full.names = T)
-  }
-  if (identical(bamfls, character(0))){
-    stop(paste0("There is not sorted bam files, or the suffix of these bam files is different from ",  suffix_bam))
+    if (identical(bamfls, character(0))){
+      stop(paste0("There is not '.srot.bam' files in ", bam_dir,
+                  ", or the suffix of these bam files is different from '",  suffix_bam, "'."))
+    }
+  } else if (!file.exists(bam_dir) & file.exists(alnd)){
+    bamfls <- list.files(alnd, suffix_bam, full.names = T)
+    if (identical(bamfls, character(0))){
+      stop(paste0("There is not '.srot.bam' files in ", alnd,
+                  ", or the suffix of these bam files is different from '",  suffix_bam, "'."))
+    }
+    res_dir <- paste0(alnd, "/", res_dir)
   }
 
-  # collect sample names and result gff files ----
+  # collect sample names from bam files, and create path of result gff files. ----
   smps <- sub(".sort.bam", "",
               sapply(strsplit(bamfls, "/"), function(x)tail(x, 1)))
   res_gff <- paste0(res_dir, "/gff/", smps, ".gff")
@@ -52,7 +68,7 @@ rep_stringtie <- function(prjd, bam_dir=paste0(prjd, "/res_hisat2"), suffix_bam=
 
   # stringtie execution ----
   ## command log ----
-  com_log <-  paste0(prjd, "/command_log.txt")
+  com_log <-  paste0(prjd, "/", alnd, "/command_log.txt")
   con <- file(com_log, "a")
   writeLines("# stringtie", con)
   ## execute ----
@@ -122,11 +138,10 @@ rep_stringtie <- function(prjd, bam_dir=paste0(prjd, "/res_hisat2"), suffix_bam=
   f <- function(x, y)dplyr::full_join(x, y, by="t_name")
   fpkm <- Reduce(f, fpkm_list)
   cov <- Reduce(f, cov_list)
-  write.table(fpkm, paste0(prjd, "/res_stringtie/FPKM.txt"),
+  write.table(fpkm, paste0(prjd, "/", alnd, "/res_stringtie/FPKM.txt"),
               quote = F, sep = "\t", row.names = F, col.names = T)
-  write.table(cov, paste0(prjd, "/res_stringtie/cov.txt"),
+  write.table(cov, paste0(prjd, "/", alnd, "/res_stringtie/cov.txt"),
               quote = F, sep = "\t", row.names = F, col.names = T)
-
 
 }
 
