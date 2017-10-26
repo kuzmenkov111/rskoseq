@@ -2,33 +2,36 @@
 % Please edit documentation in R/rep_hisat2.R
 \name{rep_hisat2}
 \alias{rep_hisat2}
-\title{Replicate execution of read mapping using hisat2}
+\title{Replicate execution of read alignment using hisat2}
 \usage{
-rep_hisat2(prj, fqdir, suffix_fq, idx, paired, ...)
+rep_hisat2(prjd, idx, paired, alnd, fqd, suffix_fq, ...)
 }
 \arguments{
-\item{prj}{character: project directory. create by 'rskoseq::dir_template'}
+\item{prjd}{character: project directory. create by 'rskoseq::dir_template'}
 
-\item{fqdir}{character: path of fastq files. default: paste0(prj, "/fastq")}
-
-\item{suffix_fq}{character: suffix of fastq files. The default is ".fastq.gz"}
-
-\item{idx}{character: hisat2 index name}
+\item{idx}{character: the fully path of hisat2 index name}
 
 \item{paired}{logical: paired or sinle read}
+
+\item{alnd}{character: the name of alignment directory. The default is "alignment1"}
+
+\item{fqd}{character: the fully path of fastq files. The default is 'paste0(prjd, "/fastq")'}
+
+\item{suffix_fq}{character: suffix of fastq files. The default is ".fastq.gz"}
 
 \item{...}{additional hisat2 options. E.g.  "--no-spliced-alignment"}
 }
 \description{
-Description
+The NGS read alignment using hisat2 for multiple samples.
+    The input and output directory must be created by 'rskoseq::project_rnsq'.
 }
 \examples{
 #
 # # arguments ----
-# project_name <- "~/pub/dat/sampledata/rnaseq/project1"
-# # fqdir <- paste0(prj, "/fastq")
-# # suffix_fq <- ".fastq.gz"
-# idx <- "~/db/index/hisat2_idx/SD0218_11_a_contig01"
+# prj <- "~/pub/rnaseq/project1"
+# idx <- "~/db/index/hisat2_idx"
 # # excution ----
-# rep_hisat2(prj=project_name, idx=idx, paired=TRUE, ...="--no-spliced-alignment")
+# rep_hisat2(prjd = prj, idx = idx, paired=TRUE, ...="--no-spliced-alignment")
+# # if excute different alignment setting/
+# rep_hisat2(prjd = prj, idx = idx, paired=FALSE, alnd = "alignment2")
 }

@@ -15,6 +15,7 @@
 #' # prfx <- sapply(strsplit(fls, "/"), function(x)sub(sffx, "", tail(x, n=1)))
 #' ## execution
 #' # res_qa <- gg_qa(filepath=fls, suffix=sffx, prefix=prfx, facet_col=2)
+#' # do.call(gridExtra::grid.arrange, c(res_qa, list(ncol=2)))
 #'
 #' @importFrom ShortRead qa
 #' @importFrom dplyr %>% arrange group_by mutate ungroup filter

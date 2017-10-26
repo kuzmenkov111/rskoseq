@@ -1,28 +1,28 @@
 #' Consecutive execution of Transcript assembly and quantification for RNA-Seq using stringtie
 #' @description Consecutive processiong of stringtie for multi samples, then FPKM and cov data table are created.
-#' @usage rep_stringtie(prj, bam_dir, suffix_bam, guide_gff, res_dir, ...)
-#' @param prj character: project directory path, created by 'rskoseq::dir_template'
-#' @param bam_dir character: The directory path of soreted bam files. The default is paste0(prj, "/res_hisat2"),
-#'     created by 'rskoseq::dir_template'.
+#' @usage rep_stringtie(prjd, bam_dir, suffix_bam, guide_gff, res_dir, ...)
+#' @param prjd character: project directory path, created by 'rskoseq::project_rnsq'
+#' @param bam_dir character: The directory path of soreted bam files. The default is paste0(prjd, "/res_hisat2"),
+#'     created by 'rskoseq::project_rnsq'.
 #' @param suffix_bam character: The default is ".sort.bam".
 #' @param guide_gff The file path of guide gff.
-#' @param res_dir output directory path, the default is 'paste0(prj, "/res_stringtie")'
+#' @param res_dir output directory path, the default is 'paste0(prjd, "/res_stringtie")'
 #' @param ... additional options of stringtie. E.g. "-e"
 #' @examples #
-#' # project_name <- "~/pub/dat/sampledata/rnaseq/project1"
+#' # prj <- "~/pub/dat/sampledata/rnaseq/project1"
 #' # guide <- "~/db/index/hisat2_idx/SD0218_11_a_contig01.gff"
-#' # rep_stringtie(prj=project_name, guide_gff=guide)
+#' # rep_stringtie(prjd=prj, guide_gff=guide)
 #' @importFrom utils tail write.table read.table
 #' @export
-rep_stringtie <- function(prj, bam_dir=paste0(prj, "/res_hisat2"), suffix_bam=".sort.bam", guide_gff, res_dir=paste0(prj, "/res_stringtie"), ...){
+rep_stringtie <- function(prjd, bam_dir=paste0(prjd, "/res_hisat2"), suffix_bam=".sort.bam", guide_gff, res_dir=paste0(prjd, "/res_stringtie"), ...){
   # argument check: stringtie program PATH ----
   if (!any(grep("stringtie", unlist(strsplit(Sys.getenv("PATH"), ":"))))){
     stop("There is not stringtie program, or the PATH does not found.")
   }
 
   # argument check: project directory ----
-  if(!file.exists(prj)){
-    stop(paste0("\'", prj, "\'", " does not found."))
+  if(!file.exists(prjd)){
+    stop(paste0("\'", prjd, "\'", " does not found."))
   }
 
   # argument check: guide_gff ----
@@ -52,7 +52,7 @@ rep_stringtie <- function(prj, bam_dir=paste0(prj, "/res_hisat2"), suffix_bam=".
 
   # stringtie execution ----
   ## command log ----
-  com_log <-  paste0(prj, "/command_log.txt")
+  com_log <-  paste0(prjd, "/command_log.txt")
   con <- file(com_log, "a")
   writeLines("# stringtie", con)
   ## execute ----
@@ -122,9 +122,9 @@ rep_stringtie <- function(prj, bam_dir=paste0(prj, "/res_hisat2"), suffix_bam=".
   f <- function(x, y)dplyr::full_join(x, y, by="t_name")
   fpkm <- Reduce(f, fpkm_list)
   cov <- Reduce(f, cov_list)
-  write.table(fpkm, paste0(prj, "/res_stringtie/FPKM.txt"),
+  write.table(fpkm, paste0(prjd, "/res_stringtie/FPKM.txt"),
               quote = F, sep = "\t", row.names = F, col.names = T)
-  write.table(cov, paste0(prj, "/res_stringtie/cov.txt"),
+  write.table(cov, paste0(prjd, "/res_stringtie/cov.txt"),
               quote = F, sep = "\t", row.names = F, col.names = T)
 
 
