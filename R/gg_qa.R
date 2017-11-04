@@ -2,7 +2,7 @@
 #' @description This functions returns ggplot objects and create report of qa. The qa report is created at above of the fastq directory.
 #' @usage gg_qa(fqdir, suffix, prefix, facet_col)
 #' @param fqdir A vector of file path of fastq files, or dir path, containing fastq files
-#' @param suffix A pattern of fastq file suffix. eg. ".fastq.gz"
+#' @param suffix A pattern of fastq file suffix. The default is ".fastq.gz"
 #' @param prefix A vector of samples name(optional).
 #' @param facet_col facet of sequence content and quality score per sample plot.
 #' @return  list of data frame for quality assesment with 'qa'
@@ -27,7 +27,7 @@
 #' @importFrom grDevices dev.off pdf
 #' @importFrom graphics plot
 #' @export
-gg_qa <- function(fqdir, suffix, prefix, facet_col){
+gg_qa <- function(fqdir, suffix=".fastq.gz", prefix, facet_col){
   # fqdir <- "~/pub/dat/sampledata/rnaseq/project1/fastq";
   # suffix <- ".fastq.gz";
   # facet_col=2
@@ -60,7 +60,7 @@ gg_qa <- function(fqdir, suffix, prefix, facet_col){
   Score <- NULL; `Sequence Content(%)` <- NULL;
 
   ## lane name ----
-  if(!missing(prefix)){
+  if(!exists("prefix")){
     smp <- sub(suffix, "", rownames(qadat[["readCounts"]]))
   }else{
     smp <- prefix
@@ -78,18 +78,18 @@ gg_qa <- function(fqdir, suffix, prefix, facet_col){
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1))
 
 
-  # sequence content ----
+  # sequence content
   scdat <- qadat[["perCycle"]]$baseCall
   scdat$lane <- as.character(scdat$lane)
 
-  ## lane name
+  ## lane name ----
   ggrep <- function(pattern, target){
     lapply(pattern, function(x){
       grep(x, target)
     })
   }
 
-  if(!missing(prefix)){
+  if(!exists("prefix")){
     smp <- sub(suffix, "", as.character(scdat$lane))
     scdat$lane <- sub(suffix,"",as.character(scdat$lane))
 
@@ -99,7 +99,7 @@ gg_qa <- function(fqdir, suffix, prefix, facet_col){
                      function(i){scdat$lane[pos[[i]]] <<- prefix[i]}))
   }
 
-  ## sequence content
+  ## sequence content ----
   scrate <- scdat %>%
     dplyr::arrange(Base) %>%
     dplyr::mutate(Base=factor(Base, levels=c("A","T","G","C","N"))) %>%
@@ -108,21 +108,21 @@ gg_qa <- function(fqdir, suffix, prefix, facet_col){
     dplyr::mutate(`Sequence Content(%)` = (Count/sum(Count))*100) %>%
     dplyr::ungroup()
 
-  ## sequence content per sample
+  ## sequence content per sample ----
   sc_gg <-
     ggplot2::ggplot(scrate, ggplot2::aes(x=Cycle, y=`Sequence Content(%)`, group=Base, colour=Base))+
     ggplot2::geom_line() +
     ggplot2::theme_bw() +
     ggplot2::facet_wrap(~lane, ncol=facet_col)
 
-  ## sequence content per nuc
+  ## sequence content per nuc ----
   sc_gg2 <-
     ggplot2::ggplot(scrate, ggplot2::aes(x=Cycle, y = `Sequence Content(%)`, colour=Base, group=lane))+
     ggplot2::geom_line(alpha=0.5) +
     ggplot2::theme_bw() +
     ggplot2::facet_wrap(~Base, ncol=facet_col)
 
-  ## fraquency of 'N' per sample
+  ## fraquency of 'N' per sample ----
   nrgg_smp <- scrate %>%
     dplyr::filter(Base=="N") %>%
     ggplot2::ggplot(ggplot2::aes(x=Cycle, y=`Sequence Content(%)`)) +
@@ -131,12 +131,12 @@ gg_qa <- function(fqdir, suffix, prefix, facet_col){
     ggplot2::labs(y="N Content(%)") +
     ggplot2::facet_wrap(~lane, ncol=2)
 
-  # quality socre per sample -----
+  # quality socre per sample
   qsdat <- qadat[["perCycle"]]$quality
   qsdat$lane <- as.character(qsdat$lane)
 
-  ## lane name
-  if(!missing(prefix)){
+  ## lane name  -----
+  if(!exists("prefix")){
     smp <- sub(suffix, "", as.character(qsdat$lane))
     qsdat$lane <- sub(suffix,"",as.character(qsdat$lane))
 
@@ -175,6 +175,7 @@ gg_qa <- function(fqdir, suffix, prefix, facet_col){
   gg_list <- list (read = read_gg, seq_cnt_smp = sc_gg, seq_cnt_nuc = sc_gg2,
                    n_gg = nrgg_smp, qsc_smp = qs_gg, qsc_all = qs_gg2)
 
+  ## save pdf ----
   grDevices::pdf(paste0(qadir, "/", "qa_plot.pdf"))
   invisible(lapply(gg_list, graphics::plot))
   grDevices::dev.off()

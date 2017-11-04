@@ -9,7 +9,7 @@ gg_qa(fqdir, suffix, prefix, facet_col)
 \arguments{
 \item{fqdir}{A vector of file path of fastq files, or dir path, containing fastq files}
 
-\item{suffix}{A pattern of fastq file suffix. eg. ".fastq.gz"}
+\item{suffix}{A pattern of fastq file suffix. The default is ".fastq.gz"}
 
 \item{prefix}{A vector of samples name(optional).}
 
