@@ -5,8 +5,8 @@
 #' @param suffix A pattern of fastq file suffix. The default is ".fastq.gz"
 #' @param prefix A vector of samples name. The default values are names of fastq files containing in fqdir, which substitute 'suffix' character.
 #' @param facet_col facet of sequence content and quality score per sample plot.
-#' @return  list of data frame for quality assesment with 'qa'
-#'     and list ofggplot objects
+#' @return  The list of ggplot objects returns and write.table for quality assesment with 'qa'.
+#'
 #' @examples
 #' ## arguments
 #' # p <- system.file("extdata/E-MTAB-1147", package = "ShortRead")
@@ -75,15 +75,15 @@ gg_qa <- function(fqdir,
   readat <- data.frame(sample = smp,
                        read = qadat[["readCounts"]]$read)
 
-  ## ggplot object
+  ## ggplot object ----
   read_gg <-
     ggplot2::ggplot(data = readat, ggplot2::aes(x = sample, y = read), fill = sample) +
     ggplot2::geom_bar(stat="identity") +
-    ggplot2::theme_bw()+
+    ggplot2::theme_bw(base_size = 15)+
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1))
 
 
-  # sequence content
+  # sequence content ----
   scdat <- qadat[["perCycle"]]$baseCall
   scdat$lane <- as.character(scdat$lane)
 
@@ -106,14 +106,14 @@ gg_qa <- function(fqdir,
   sc_gg <-
     ggplot2::ggplot(scrate, ggplot2::aes(x=Cycle, y=`Sequence Content(%)`, group=Base, colour=Base))+
     ggplot2::geom_line() +
-    ggplot2::theme_bw() +
+    ggplot2::theme_bw(base_size = 15) +
     ggplot2::facet_wrap(~lane, ncol=facet_col)
 
   ## sequence content per nuc ----
   sc_gg2 <-
     ggplot2::ggplot(scrate, ggplot2::aes(x=Cycle, y = `Sequence Content(%)`, colour=Base, group=lane))+
     ggplot2::geom_line(alpha=0.5) +
-    ggplot2::theme_bw() +
+    ggplot2::theme_bw(base_size = 15) +
     ggplot2::facet_wrap(~Base, ncol=facet_col)
 
   ## fraquency of 'N' per sample ----
@@ -121,7 +121,7 @@ gg_qa <- function(fqdir,
     dplyr::filter(Base=="N") %>%
     ggplot2::ggplot(ggplot2::aes(x=Cycle, y=`Sequence Content(%)`)) +
     ggplot2::geom_point() +
-    ggplot2::theme_bw() +
+    ggplot2::theme_bw(base_size = 15) +
     ggplot2::labs(y="N Content(%)") +
     ggplot2::facet_wrap(~lane, ncol=2)
 
@@ -143,7 +143,7 @@ gg_qa <- function(fqdir,
 
   qs_gg <- ggplot2::ggplot(qsds, ggplot2::aes(x=Cycle, y=value, group=Qscore, colour=Qscore))+
     ggplot2::geom_point() +
-    ggplot2::theme_bw() +
+    ggplot2::theme_bw(base_size = 15) +
     ggplot2::facet_wrap(~lane, ncol=facet_col)
 
   # quality score all sample -----
@@ -153,23 +153,63 @@ gg_qa <- function(fqdir,
     dplyr::filter(Qscore=="mean") %>%
     ggplot2::ggplot(ggplot2::aes(x = Cycle, y = value))+
     ggplot2::geom_point(size = 0.7, alpha = 0.5) +
-    ggplot2::theme_light() +
+    ggplot2::theme_light(base_size = 15) +
     ggplot2::theme(legend.position = "none") +
     ggplot2::labs(title = gttle, y = "Mean Quality Score")
 
 
-  # return ----
-  ## return list of data frames
-  df_list <- list(Read = readat, QScore = qsdat, SContent=scdat)
+  # return list of ggplot obj and write.table
+  ## list of data frame and ggplot objects   ----
+  df_list <- list(readat, scrate, qsds)
   gg_list <- list (read = read_gg, seq_cnt_smp = sc_gg, seq_cnt_nuc = sc_gg2,
                    n_gg = nrgg_smp, qsc_smp = qs_gg, qsc_all = qs_gg2)
 
-  ## save pdf ----
-  grDevices::pdf(paste0(qadir, "/", "qa_plot.pdf"))
-  invisible(lapply(gg_list, graphics::plot))
+  ## write.table ----
+  fls <- paste0(qadir, c("/readat.txt", "/scrate.txt", "/qsdat.txt"))
+  invisible(lapply(seq_along(fls), function(i){
+    write.table(df_list[[i]], fls[[i]], sep="\t", quote = F, col.names = T, row.names = F)
+  }))
+
+  ## save pdf
+  ## read ----
+  grDevices::pdf(paste0(qadir, "/", "read.pdf"), width = 10, height = 5)
+  print(read_gg)
   grDevices::dev.off()
 
-  return(gg_list)
+  ## sc per sample ----
+  if (nrow(readat) > 48){
+    grDevices::pdf(paste0(qadir, "/", "sc.pdf"), width = 10, height = 5)
+    sc <- ggplus::facet_multiple(plot=sc_gg, facets="lane", ncol = 8, nrow = 6)
+    grDevices::dev.off()
+
+  } else {
+    grDevices::pdf(paste0(qadir, "/", "sc_s.pdf"), width = 10, height = 5)
+    print(sc_gg)
+    grDevices::dev.off()
+  }
+
+  ## sc per base ----
+  grDevices::pdf(paste0(qadir, "/", "sc_b.pdf"), width = 10, height = 5)
+  print(sc_gg2)
+  grDevices::dev.off()
+
+  ## qs per sample ----
+  if (nrow(readat) > 48){
+    grDevices::pdf(paste0(qadir, "/", "qs_s.pdf"), width = 10, height = 5)
+    sc <- ggplus::facet_multiple(plot=qs_gg, facets="lane", ncol = 8, nrow = 6)
+    grDevices::dev.off()
+
+  } else {
+    grDevices::pdf(paste0(qadir, "/", "qs_s.pdf"), width = 10, height = 5)
+    print(qs_gg)
+    grDevices::dev.off()
+  }
+
+  ## qs all ----
+  grDevices::pdf(paste0(qadir, "/", "qs_al.pdf"), width = 10, height = 5)
+  print(qs_gg2)
+  grDevices::dev.off()
+
 
 
 }

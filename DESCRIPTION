@@ -9,6 +9,7 @@ Description: More about what it does (maybe more than one line)
 Imports: 
     dplyr, 
     ggplot2,
+    ggplus,
     graphics,
     rsko,
     ShortRead, 
