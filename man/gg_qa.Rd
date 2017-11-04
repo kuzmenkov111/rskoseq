@@ -4,32 +4,33 @@
 \alias{gg_qa}
 \title{Quality assesment with ShortRead package and return ggplot object.}
 \usage{
-gg_qa(filepath, suffix, prefix, facet_col)
+gg_qa(fqdir, suffix, prefix, facet_col)
 }
 \arguments{
-\item{filepath}{A vector of file path of fastq files, or dir path, containing fastq files}
+\item{fqdir}{A vector of file path of fastq files, or dir path, containing fastq files}
 
 \item{suffix}{A pattern of fastq file suffix. eg. ".fastq.gz"}
 
 \item{prefix}{A vector of samples name(optional).}
 
-\item{facet_col}{facet}
+\item{facet_col}{facet of sequence content and quality score per sample plot.}
 }
 \value{
 list of data frame for quality assesment with 'qa'
     and list ofggplot objects
 }
 \description{
-This functions returns ggplot objects
+This functions returns ggplot objects and create report of qa. The qa report is created at above of the fastq directory.
 }
 \examples{
 ## arguments
 # p <- system.file("extdata/E-MTAB-1147", package = "ShortRead")
 # sffx <- ".fastq.gz"
-# fls <- list.files(p, sffx, full.names = TRUE)
-# prfx <- sapply(strsplit(fls, "/"), function(x)sub(sffx, "", tail(x, n=1)))
+# fqs <- list.files(p, sffx)
+# prfx <- sapply(strsplit(fqs, "/"), function(x)sub(sffx, "", tail(x, n=1)))
+
 ## execution
-# res_qa <- gg_qa(filepath=fls, suffix=sffx, prefix=prfx, facet_col=2)
+# res_qa <- gg_qa(fqdir=p, suffix=sffx, prefix=prfx, facet_col=2)
 # do.call(gridExtra::grid.arrange, c(res_qa, list(ncol=2)))
 
 }

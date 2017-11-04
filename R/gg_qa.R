@@ -1,50 +1,72 @@
 #' Quality assesment with ShortRead package and return ggplot object.
-#' @description This functions returns ggplot objects
-#' @usage gg_qa(filepath, suffix, prefix, facet_col)
-#' @param filepath A vector of file path of fastq files, or dir path, containing fastq files
+#' @description This functions returns ggplot objects and create report of qa. The qa report is created at above of the fastq directory.
+#' @usage gg_qa(fqdir, suffix, prefix, facet_col)
+#' @param fqdir A vector of file path of fastq files, or dir path, containing fastq files
 #' @param suffix A pattern of fastq file suffix. eg. ".fastq.gz"
 #' @param prefix A vector of samples name(optional).
-#' @param facet_col facet
+#' @param facet_col facet of sequence content and quality score per sample plot.
 #' @return  list of data frame for quality assesment with 'qa'
 #'     and list ofggplot objects
 #' @examples
 #' ## arguments
 #' # p <- system.file("extdata/E-MTAB-1147", package = "ShortRead")
 #' # sffx <- ".fastq.gz"
-#' # fls <- list.files(p, sffx, full.names = TRUE)
-#' # prfx <- sapply(strsplit(fls, "/"), function(x)sub(sffx, "", tail(x, n=1)))
+#' # fqs <- list.files(p, sffx)
+#' # prfx <- sapply(strsplit(fqs, "/"), function(x)sub(sffx, "", tail(x, n=1)))
+#'
 #' ## execution
-#' # res_qa <- gg_qa(filepath=fls, suffix=sffx, prefix=prfx, facet_col=2)
+#' # res_qa <- gg_qa(fqdir=p, suffix=sffx, prefix=prfx, facet_col=2)
 #' # do.call(gridExtra::grid.arrange, c(res_qa, list(ncol=2)))
 #'
-#' @importFrom ShortRead qa
+#' @importFrom ShortRead qa report
 #' @importFrom dplyr %>% arrange group_by mutate ungroup filter
 #' @importFrom ggplot2 ggplot aes geom_bar theme_bw theme element_text
 #' @importFrom tidyr gather
 #' @importFrom stats median
+#' @importFrom utils head
+#' @importFrom grDevices dev.off pdf
+#' @importFrom graphics plot
 #' @export
-gg_qa <- function(filepath, suffix, prefix, facet_col){
-  # file exists or not(full path)
-  if (!all(file.exists(filepath))){
+gg_qa <- function(fqdir, suffix, prefix, facet_col){
+  # fqdir <- "~/pub/dat/sampledata/rnaseq/project1/fastq";
+  # suffix <- ".fastq.gz";
+  # facet_col=2
+
+  # file exists or not(full path) ----
+  if (!all(file.exists(fqdir))){
     stop("I cannot find these all files.")
   }
 
-  # quarity assesment ----
-  qadat <- ShortRead::qa(dirPath = filepath)
+  # quarity assesment
+  ## outputdir ----
+  qadir <-
+    paste0(
+      paste(lapply(strsplit(fqdir, "/"), function(x)head(x, length(x)-1))[[1]],
+                  collapse = "/"),
+      "/qa")
+  if (!file.exists(qadir)){
+    dir.create(qadir)
+  } else if (file.exists(qadir) & !identical(list.files(qadir), character(0))){
+    stop(paste("There is some file at ", qadir))
+  }
 
-  # read number ----
+  ## execute qa and reporting ----
+  qadat <- ShortRead::qa(dirPath = fqdir)
+  ShortRead::report(qadat, dest = paste0(qadir, "/report"))
+
+  ## read number ----
   read <- NULL; Base <- NULL; Count <- NULL; Cycle <- NULL; Qscore <- NULL;
   `Score Sequence Content(%)` <- NULL;  lane <- NULL; value <- NULL;
   Score <- NULL; `Sequence Content(%)` <- NULL;
 
-  ## lane name
+  ## lane name ----
   if(!missing(prefix)){
     smp <- sub(suffix, "", rownames(qadat[["readCounts"]]))
   }else{
     smp <- prefix
   }
 
-  ## read data frame
+  ## read data frame ----
   readat <- data.frame(sample = smp,
                        read = qadat[["readCounts"]]$read)
 
@@ -66,6 +88,7 @@ gg_qa <- function(filepath, suffix, prefix, facet_col){
       grep(x, target)
     })
   }
+
   if(!missing(prefix)){
     smp <- sub(suffix, "", as.character(scdat$lane))
     scdat$lane <- sub(suffix,"",as.character(scdat$lane))
@@ -152,6 +175,11 @@ gg_qa <- function(filepath, suffix, prefix, facet_col){
   gg_list <- list (read = read_gg, seq_cnt_smp = sc_gg, seq_cnt_nuc = sc_gg2,
                    n_gg = nrgg_smp, qsc_smp = qs_gg, qsc_all = qs_gg2)
 
+  grDevices::pdf(paste0(qadir, "/", "qa_plot.pdf"))
+  invisible(lapply(gg_list, graphics::plot))
+  grDevices::dev.off()
+
   return(gg_list)
+
 
 }

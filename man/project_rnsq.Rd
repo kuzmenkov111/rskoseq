@@ -19,8 +19,9 @@ Create Project directories for RNA-seq pipeline using hisat2-stringtie.
 }
 \examples{
 # # create new project
-# prj <- "~/pub/sampledata/project1"
+# prj <- "~/pub/dat/sampledata/rnaseq/project1"
 # project_rnsq(prjd = prj)
+# project_rnsq(prjd = prj, alnd="rsem1", algnr="rsem")
 # system(paste("tree", prj))
 # # now there is a project directory, create another alignment directory.
 # project_rnsq(prjd = prj, alnd = "alignment2")
