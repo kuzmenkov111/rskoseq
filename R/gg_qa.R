@@ -95,7 +95,7 @@ gg_qa <- function(filepath, suffix, prefix, facet_col){
   ## sequence content per nuc
   sc_gg2 <-
     ggplot2::ggplot(scrate, ggplot2::aes(x=Cycle, y = `Sequence Content(%)`, colour=Base, group=lane))+
-    ggplot2::geom_line(alpha=0.5, size=1) +
+    ggplot2::geom_line(alpha=0.5) +
     ggplot2::theme_bw() +
     ggplot2::facet_wrap(~Base, ncol=facet_col)
 

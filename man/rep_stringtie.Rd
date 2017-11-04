@@ -30,5 +30,5 @@ Consecutive processiong of stringtie for multiple samples, then FPKM and cov dat
 # prj <- "~/pub/dat/sampledata/rnaseq/project1"
 # guide <- "~/db/index/hisat2_idx/SD0218_11_a_contig01.gff"
 # bamdir <- "alignment1"
-# rep_stringtie(prjd=prj, alnd=bamdir, guide_gff=guide)
+# rep_stringtie(prjd=prj, alnd=bamdir, guide_gff=guide, ... = "-p 8")
 }

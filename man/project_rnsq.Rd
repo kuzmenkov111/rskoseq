@@ -4,20 +4,22 @@
 \alias{project_rnsq}
 \title{Create directory for RNA-seq pipeline}
 \usage{
-project_rnsq(prjd, alnd)
+project_rnsq(prjd, alnd, algnr)
 }
 \arguments{
 \item{prjd}{character: path of a project directory name}
 
 \item{alnd}{character: path of a alignment directory name, the default is "alignment1"}
+
+\item{algnr}{character: select an alignment program from "hisat2"(default), "rsem", "others"}
 }
 \description{
 Create Project directories for RNA-seq pipeline using hisat2-stringtie.
-   Then fastq files move to './project/fastq'　directory, followning execution of 'rskoseq::rep_hisat2', for read mapping using hisat2.
+   Then fastq files move to './project/fastq'　directory, followning execution of 'rskoseq::rep_hisat2' or 'rskoseq::rep_rsem', for read mapping.
 }
 \examples{
 # # create new project
-# prj <- "~/pub/dat/sampledata/rnaseq/project1"
+# prj <- "~/pub/sampledata/project1"
 # project_rnsq(prjd = prj)
 # system(paste("tree", prj))
 # # now there is a project directory, create another alignment directory.

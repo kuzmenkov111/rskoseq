@@ -9,16 +9,58 @@
 #' @param fqd character: the fully path of fastq files. The default is 'paste0(prjd, "/fastq")'
 #' @param suffix_fq character: suffix of fastq files. The default is ".fastq.gz"
 #' @param ... additional hisat2 options. E.g.  "--no-spliced-alignment"
-#' @examples #
-#' # # arguments ----
-#' # prj <- "~/pub/rnaseq/project1"
+#' @importFrom utils tail
+#' @examples # # arguments ----
+#' # prj <- "~/pub/sampledata/rnaseq/project1"
 #' # idx <- "~/db/index/hisat2_idx"
+#'
 #' # # excution ----
 #' # rep_hisat2(prjd = prj, idx = idx, paired=TRUE, ...="--no-spliced-alignment")
+#'
 #' # # if excute different alignment setting/
 #' # rep_hisat2(prjd = prj, idx = idx, paired=FALSE, alnd = "alignment2")
-#' @importFrom utils tail
+#'
+#' # # now directory component
+#' # project1/
+#' # ├── alignment1
+#' # │   ├── project1_alignment1_log.txt
+#' # │   ├── res_hisat2
+#' # │   │   ├── failalign
+#' # │   │   │   ├── test1.failalign.fq.1.gz
+#' # │   │   │   ├── test1.failalign.fq.2.gz
+#' # │   │   │   ├── test2.failalign.fq.1.gz
+#' # │   │   │   └── test2.failalign.fq.2.gz
+#' # │   │   ├── h2_log.txt
+#' # │   │   ├── test1.hisat.met.txt
+#' # │   │   ├── test1.sort.bam
+#' # │   │   ├── test2.hisat.met.txt
+#' # │   │   └── test2.sort.bam
+#' # │   └── res_stringtie
+#' # │       ├── ballgown
+#' # │       ├── gff
+#' # │       ├── mgff
+#' # │       └── tab
+#' # ├── alignment2
+#' # │   ├── res_hisat2
+#' # │   │   └── failalign
+#' # │   └── res_stringtie
+#' # │       ├── ballgown
+#' # │       ├── gff
+#' # │       ├── mgff
+#' # │       └── tab
+#' # ├── fastq
+#' # │   ├── test1_R1.fastq.gz
+#' # │   ├── test1_R2.fastq.gz
+#' # │   ├── test2_R1.fastq.gz
+#' # │   └── test2_R2.fastq.gz
+#' # └── qa
+#' #
+#' # 18 directories, 14 files
 #' @export
+## memo delete
+## prjd="~/pub/dat/sampledata/rnaseq/project1";
+## idx <- "~/db/index/hisat2_idx/SD0218_11_a_contig01"; paired=T;alnd = "alignment2"
+## fqd = paste0(prjd, "/fastq"); suffix_fq=".fastq.gz"
 rep_hisat2 <- function(prjd, idx, paired,
                        alnd = "alignment1",
                        fqd = paste0(prjd, "/fastq"),
@@ -38,13 +80,13 @@ rep_hisat2 <- function(prjd, idx, paired,
   if(!file.exists(prjd)){
     stop(paste0("\'", prjd, "\'", " does not found."))
   }
-  # argument check: hisat2 index  ----
+  # argument check: hisat2 index exists or not  ----
   idx1 <- paste0(idx, ".1.ht2")
   if (!file.exists(idx1)){
-    stop("create hisat2 index.")
+    stop(paste0("Thres is not hisat2 index named as ", idx, " ."))
   }
 
-  # argument check: alignment directory ----
+  # argument check: alignment directory  exists or not ----
   alnp <- paste0(prjd, "/", alnd)
   if (!file.exists(alnp)){
     stop(paste0(" There is not alignment directory '", alnd, "', which is at directly under the '", prjd, "'. \n"))
@@ -56,8 +98,8 @@ rep_hisat2 <- function(prjd, idx, paired,
     stop(paste0(" There is already bam files in the '", bamf, "' ."))
   }
 
-  # argument check: path of fastq files and collect fastq files fqd and sample name----
-  ## fastq directory and fastq files
+  # argument check: path of fastq files and collect fastq files fqd and sample name
+  # argument check: fastq directory  ----
   if (file.exists(fqd)){
     fqpath <- list.files(fqd, suffix_fq, full.names = TRUE)
     if (identical(fqpath, character(0))) {
@@ -67,23 +109,33 @@ rep_hisat2 <- function(prjd, idx, paired,
     stop(paste0("There is not '",fqd, "'  directory."))
   }
 
-  # fastq files path ----
+  # collect PATH of fastq files in fastq directory  ----
   r1fqs <- grep("R1", list.files(fqd, suffix_fq, full.names = T), value = T)
   r2fqs <- grep("R2", list.files(fqd, suffix_fq, full.names = T), value = T)
   prefix <- sub(paste0("_R1", suffix_fq), "",
                 sapply(strsplit(r1fqs, "\\/"), function(x)tail(x, 1)))
 
-  # hisat2 log file ----
+  # create command and execution ----
+  ## hisat2 log file ----
   logout <- paste0(" 2>> ", prjd, "/", alnd, "/res_hisat2/h2_log.txt")
 
-  # execute hisat2
-  ## command log ----
-  com_log <-  paste0(prjd, "/", alnd, "/command_log.txt")
-  con <- file(com_log, "a")
+  ## detect cores ----
+  cores <- parallel::detectCores()
+
+  ## command log maked by rskoseq::project_rnsq or newly creaion. ----
+  logfile  <-  list.files(paste0(prjd, "/", alnd), "log.txt", full.names = T)
+  if (identical(logfile, character(0))){
+    prjn <- sapply(strsplit(prjd, "/"), function(x)tail(x,1))
+    logfile <- paste0(prjd, "/",alnd, "/", prjn, "_", alnd, "_", "log.txt")
+    file.create(logfile)
+  }
+
+  ## open connection of command-log file ----
+  con <- file(logfile, "a")
   writeLines("# hisat2", con)
+
   ## bam, h2_log.txt, and met files must be in the same directory. ----
   for(i in seq_along(r1fqs)){
-    # Synthesis of command parts
     ## fail align ----
     failaln <- paste0(prjd, "/", alnd, "/res_hisat2/failalign/",
                       prefix[i], ".failalign.fq.gz")
@@ -97,16 +149,17 @@ rep_hisat2 <- function(prjd, idx, paired,
       add_op <- ""
     }
 
-    ## sam -> bam -> sort ----
+    ## samtools sam -> bam -> sort ----
     bamdir <- paste0(prjd, "/", alnd, "/res_hisat2/", prefix[i], ".sort.bam")
     bampfx <- paste0(prjd, "/", alnd, "/res_hisat2/", prefix[i], "_sort")
     com_smtools <-
-      paste0( samc, " view -bS -@ 4 - | ",
-              samc, " sort -O bam -o ", bamdir," -T ", bampfx, " -@ 4" )
+      paste0( samc, " view -bS -@ ", cores, " - | ",
+              samc, " sort -O bam -o ", bamdir," -T ", bampfx, " -@ ",cores )
+
 
     # execute command ----
     if (paired == TRUE){ ## paired end
-      com <- paste0(hs2c, " -p 4 -x ", idx,
+      com <- paste0(hs2c, " -p ", cores, " -x ", idx,
                     " --un-conc-gz ", failaln,
                     " --met-file ", metfile,
                     " --dta",
@@ -127,7 +180,7 @@ rep_hisat2 <- function(prjd, idx, paired,
       writeLines(com, con)
 
     } else if (paired == FALSE){ # single
-      com <- paste0(hs2c, " -p 4 -x ", idx,
+      com <- paste0(hs2c, " -p ", cores, " -x ", idx,
                     " --un-conc-gz ", failaln,
                     " --met-file ", metfile,
                     add_op,
@@ -145,15 +198,9 @@ rep_hisat2 <- function(prjd, idx, paired,
       ## write command to command_log.txt ----
       writeLines(com, con)
     }
-
   }
 
   # close command_log connection ----
   close(con)
-
-  # move files to the respective directory. ----
-  # mvbam <- paste0("mv ", paste0(prjd, "/res_hisat2/*.bam ", prjd, "/res_hisat2/sortbam") )
-  # system(mvbam)
-
 }
 

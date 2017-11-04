@@ -26,12 +26,50 @@ The NGS read alignment using hisat2 for multiple samples.
     The input and output directory must be created by 'rskoseq::project_rnsq'.
 }
 \examples{
-#
 # # arguments ----
-# prj <- "~/pub/rnaseq/project1"
+# prj <- "~/pub/sampledata/rnaseq/project1"
 # idx <- "~/db/index/hisat2_idx"
+
 # # excution ----
 # rep_hisat2(prjd = prj, idx = idx, paired=TRUE, ...="--no-spliced-alignment")
+
 # # if excute different alignment setting/
 # rep_hisat2(prjd = prj, idx = idx, paired=FALSE, alnd = "alignment2")
+
+# # now directory component
+# project1/
+# ├── alignment1
+# │   ├── project1_alignment1_log.txt
+# │   ├── res_hisat2
+# │   │   ├── failalign
+# │   │   │   ├── test1.failalign.fq.1.gz
+# │   │   │   ├── test1.failalign.fq.2.gz
+# │   │   │   ├── test2.failalign.fq.1.gz
+# │   │   │   └── test2.failalign.fq.2.gz
+# │   │   ├── h2_log.txt
+# │   │   ├── test1.hisat.met.txt
+# │   │   ├── test1.sort.bam
+# │   │   ├── test2.hisat.met.txt
+# │   │   └── test2.sort.bam
+# │   └── res_stringtie
+# │       ├── ballgown
+# │       ├── gff
+# │       ├── mgff
+# │       └── tab
+# ├── alignment2
+# │   ├── res_hisat2
+# │   │   └── failalign
+# │   └── res_stringtie
+# │       ├── ballgown
+# │       ├── gff
+# │       ├── mgff
+# │       └── tab
+# ├── fastq
+# │   ├── test1_R1.fastq.gz
+# │   ├── test1_R2.fastq.gz
+# │   ├── test2_R1.fastq.gz
+# │   └── test2_R2.fastq.gz
+# └── qa
+#
+# 18 directories, 14 files
 }

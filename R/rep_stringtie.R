@@ -15,7 +15,7 @@
 #' # prj <- "~/pub/dat/sampledata/rnaseq/project1"
 #' # guide <- "~/db/index/hisat2_idx/SD0218_11_a_contig01.gff"
 #' # bamdir <- "alignment1"
-#' # rep_stringtie(prjd=prj, alnd=bamdir, guide_gff=guide)
+#' # rep_stringtie(prjd=prj, alnd=bamdir, guide_gff=guide, ... = "-p 8")
 #' @importFrom utils tail write.table read.table
 #' @export
 rep_stringtie <- function(prjd,
@@ -27,10 +27,11 @@ rep_stringtie <- function(prjd,
     stop("There is not stringtie program, or the PATH does not found.")
   }
 
-  # argument check: project directory ----
+  # argument check: project directory and project name ----
   if(!file.exists(prjd)){
     stop(paste0("\'", prjd, "\'", " does not found."))
   }
+  prjn <- sapply(strsplit(prjd, "/"), function(x)tail(x,1))
 
   # argument check: guide_gff ----
   if (!file.exists(guide_gff)){
@@ -67,20 +68,28 @@ rep_stringtie <- function(prjd,
   }
 
   # stringtie execution ----
-  ## command log ----
-  com_log <-  paste0(prjd, "/", alnd, "/command_log.txt")
-  con <- file(com_log, "a")
+  ## command log maked by rskoseq::project_rnsq or newly creaion. ----
+  logfile  <-  list.files(paste0(prjd, "/", alnd), "log.txt", full.names = T)
+  if (identical(logfile, character(0))){
+    logfile <- paste0(prjd, "/",alnd, "/", prjn, "_", alnd, "_", "log.txt")
+    file.create(logfile)
+  }
+  ## open connection of
+  con <- file(logfile, "a")
   writeLines("# stringtie", con)
+
+  ## detect cores ----
+  cores <- parallel::detectCores()
+
   ## execute ----
   for(i in seq_along(bamfls)){
-    com <- paste0("stringtie -p 4 ", bamfls[i], " -G ", guide_gff, " -o ", res_gff[i], add_op)
+    com <- paste("stringtie -p", cores, bamfls[i], "-G", guide_gff, "-o", res_gff[i], add_op, sep = " ")
     cat(paste0(com, " \n"))
     system(com, wait = TRUE)
 
     ## write command log ----
     writeLines(com, con)
   }
-
 
   # stringtie --merge execution ----
   ## create gff list files (it must be full path) ----
@@ -96,7 +105,7 @@ rep_stringtie <- function(prjd,
   ## over write command log ----
   writeLines(paste0("# stringtie --merge \n", com2), con)
 
-  # stringtie execution using merged gff ----
+  # stringtie execution using merged gff
   ## define output files ----
   mgff <- paste0(res_dir, "/merged.gff")
   res_mgff <- paste0(res_dir, "/mgff/", smps, "_m.gff")
@@ -111,7 +120,8 @@ rep_stringtie <- function(prjd,
     }
     ## command of 'stringtie -eb'
     com3 <-
-      paste0("stringtie -p 4 ", bamfls[i],
+      paste0("stringtie -p ", cores,
+             " ", bamfls[i],
              " -e ",
              " -A ", res_tab[i],
              " -b ", res_ballgown[i],
@@ -135,13 +145,17 @@ rep_stringtie <- function(prjd,
   fpkm_list <- lapply(t_dats, function(x)x[c("t_name", "FPKM")])
   invisible(lapply(seq_along(cov_list), function(i) names(cov_list[[i]])[[2]] <<- smps[i]))
   invisible(lapply(seq_along(fpkm_list), function(i) names(fpkm_list[[i]])[[2]] <<- smps[i]))
+
   f <- function(x, y)dplyr::full_join(x, y, by="t_name")
   fpkm <- Reduce(f, fpkm_list)
   cov <- Reduce(f, cov_list)
-  write.table(fpkm, paste0(prjd, "/", alnd, "/res_stringtie/FPKM.txt"),
-              quote = F, sep = "\t", row.names = F, col.names = T)
-  write.table(cov, paste0(prjd, "/", alnd, "/res_stringtie/cov.txt"),
-              quote = F, sep = "\t", row.names = F, col.names = T)
+
+  # output file ----
+  fpkmout <- paste0(res_dir, "/", prjn, "_", alnd, "_FPKM.txt")
+  covout <- paste0(res_dir, "/", prjn, "_", alnd, "_cov.txt")
+
+  write.table(fpkm, fpkmout, quote = F, sep = "\t", row.names = F, col.names = T)
+  write.table(cov, covout, quote = F, sep = "\t", row.names = F, col.names = T)
 
 }
 
