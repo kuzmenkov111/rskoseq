@@ -3,7 +3,7 @@
 #' @usage gg_qa(fqdir, suffix, prefix, facet_col)
 #' @param fqdir A vector of file path of fastq files, or dir path, containing fastq files
 #' @param suffix A pattern of fastq file suffix. The default is ".fastq.gz"
-#' @param prefix A vector of samples name(optional).
+#' @param prefix A vector of samples name. The default values are names of fastq files containing in fqdir, which substitute 'suffix' character.
 #' @param facet_col facet of sequence content and quality score per sample plot.
 #' @return  list of data frame for quality assesment with 'qa'
 #'     and list ofggplot objects
@@ -21,13 +21,17 @@
 #' @importFrom ShortRead qa report
 #' @importFrom dplyr %>% arrange group_by mutate ungroup filter
 #' @importFrom ggplot2 ggplot aes geom_bar theme_bw theme element_text
+#' @importFrom grDevices dev.off pdf
+#' @importFrom graphics plot
+#' @importFrom rsko mstrings
 #' @importFrom tidyr gather
 #' @importFrom stats median
 #' @importFrom utils head
-#' @importFrom grDevices dev.off pdf
-#' @importFrom graphics plot
 #' @export
-gg_qa <- function(fqdir, suffix=".fastq.gz", prefix, facet_col){
+gg_qa <- function(fqdir,
+                  suffix=".fastq.gz",
+                  prefix =sub(suffix, "", list.files(fqdir, suffix)),
+                  facet_col){
   # fqdir <- "~/pub/dat/sampledata/rnaseq/project1/fastq";
   # suffix <- ".fastq.gz";
   # facet_col=2
@@ -60,11 +64,12 @@ gg_qa <- function(fqdir, suffix=".fastq.gz", prefix, facet_col){
   Score <- NULL; `Sequence Content(%)` <- NULL;
 
   ## lane name ----
-  if(!exists("prefix")){
-    smp <- sub(suffix, "", rownames(qadat[["readCounts"]]))
-  }else{
+  if(length(rownames(qadat[["readCounts"]])) != length(prefix) | identical(prefix, character(0))){
+    stop("The number of prefix and samples must to be the same.")
+  } else {
     smp <- prefix
   }
+
 
   ## read data frame ----
   readat <- data.frame(sample = smp,
@@ -83,21 +88,10 @@ gg_qa <- function(fqdir, suffix=".fastq.gz", prefix, facet_col){
   scdat$lane <- as.character(scdat$lane)
 
   ## lane name ----
-  ggrep <- function(pattern, target){
-    lapply(pattern, function(x){
-      grep(x, target)
-    })
-  }
-
-  if(!exists("prefix")){
-    smp <- sub(suffix, "", as.character(scdat$lane))
-    scdat$lane <- sub(suffix,"",as.character(scdat$lane))
-
-  }else{
-    pos <- ggrep(prefix, as.character(scdat$lane))
-    invisible(lapply(seq_along(pos),
-                     function(i){scdat$lane[pos[[i]]] <<- prefix[i]}))
-  }
+  scdat$lane <- rsko::mstrings(patterns = unique(as.character(scdat$lane)),
+                               target = as.character(scdat$lane),
+                               action = "mmsub",
+                               replacements = prefix )
 
   ## sequence content ----
   scrate <- scdat %>%
@@ -135,16 +129,11 @@ gg_qa <- function(fqdir, suffix=".fastq.gz", prefix, facet_col){
   qsdat <- qadat[["perCycle"]]$quality
   qsdat$lane <- as.character(qsdat$lane)
 
-  ## lane name  -----
-  if(!exists("prefix")){
-    smp <- sub(suffix, "", as.character(qsdat$lane))
-    qsdat$lane <- sub(suffix,"",as.character(qsdat$lane))
-
-  }else{
-    pos <- ggrep(prefix, as.character(qsdat$lane))
-    invisible(lapply(seq_along(pos),
-                     function(i){qsdat$lane[pos[[i]]] <<- prefix[i]}))
-  }
+  ## replace the lane name by prefix ----
+  qsdat$lane <- rsko::mstrings(patterns = unique(as.character(qsdat$lane)),
+                               target = as.character(qsdat$lane),
+                               action = "mmsub",
+                               replacements = prefix )
 
   qsds <- qsdat %>%
     dplyr::group_by(Cycle, lane) %>%

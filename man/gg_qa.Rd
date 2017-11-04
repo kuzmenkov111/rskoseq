@@ -11,7 +11,7 @@ gg_qa(fqdir, suffix, prefix, facet_col)
 
 \item{suffix}{A pattern of fastq file suffix. The default is ".fastq.gz"}
 
-\item{prefix}{A vector of samples name(optional).}
+\item{prefix}{A vector of samples name. The default values are names of fastq files containing in fqdir, which substitute 'suffix' character.}
 
 \item{facet_col}{facet of sequence content and quality score per sample plot.}
 }

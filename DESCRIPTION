@@ -10,6 +10,7 @@ Imports:
     dplyr, 
     ggplot2,
     graphics,
+    rsko,
     ShortRead, 
     tidyr
 Depends: R (>= 2.10)
