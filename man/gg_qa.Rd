@@ -16,8 +16,7 @@ gg_qa(fqdir, suffix, prefix, facet_col)
 \item{facet_col}{facet of sequence content and quality score per sample plot.}
 }
 \value{
-list of data frame for quality assesment with 'qa'
-    and list ofggplot objects
+The list of ggplot objects returns and write.table for quality assesment with 'qa'.
 }
 \description{
 This functions returns ggplot objects and create report of qa. The qa report is created at above of the fastq directory.

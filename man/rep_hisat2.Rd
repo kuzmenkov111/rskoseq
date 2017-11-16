@@ -4,18 +4,17 @@
 \alias{rep_hisat2}
 \title{Replicate execution of read alignment using hisat2}
 \usage{
-rep_hisat2(prjd, idx, paired, alnd, fqd, suffix_fq, ...)
+rep_hisat2(alndir, idx, fqdir, paired, suffix_fq, ...)
 }
 \arguments{
-\item{prjd}{character: project directory. create by 'rskoseq::dir_template'}
+\item{alndir}{character: the name of alignment directory. results output}
 
-\item{idx}{character: the fully path of hisat2 index name}
+\item{idx}{character: the fully path of hisat2 index name.}
 
-\item{paired}{logical: paired or sinle read}
+\item{fqdir}{character: the fully path of fastq files. The default is 'paste0(dirname(alndir), "/fastq")'.
+If this directory containing still analyzed fastq and additional fastq files,}
 
-\item{alnd}{character: the name of alignment directory. The default is "alignment1"}
-
-\item{fqd}{character: the fully path of fastq files. The default is 'paste0(prjd, "/fastq")'}
+\item{paired}{logical: paired or single read. If paired end, the names of fastq file must be "_R1" and "_R2".}
 
 \item{suffix_fq}{character: suffix of fastq files. The default is ".fastq.gz"}
 
@@ -27,49 +26,11 @@ The NGS read alignment using hisat2 for multiple samples.
 }
 \examples{
 # # arguments ----
-# prj <- "~/pub/sampledata/rnaseq/project1"
+# alndir <- "~/pub/sampledata/rnaseq/project1/alignment1"
 # idx <- "~/db/index/hisat2_idx"
-
 # # excution ----
 # rep_hisat2(prjd = prj, idx = idx, paired=TRUE, ...="--no-spliced-alignment")
 
-# # if excute different alignment setting/
+# # if all result create under the alignment directory
 # rep_hisat2(prjd = prj, idx = idx, paired=FALSE, alnd = "alignment2")
-
-# # now directory component
-# project1/
-# ├── alignment1
-# │   ├── project1_alignment1_log.txt
-# │   ├── res_hisat2
-# │   │   ├── failalign
-# │   │   │   ├── test1.failalign.fq.1.gz
-# │   │   │   ├── test1.failalign.fq.2.gz
-# │   │   │   ├── test2.failalign.fq.1.gz
-# │   │   │   └── test2.failalign.fq.2.gz
-# │   │   ├── h2_log.txt
-# │   │   ├── test1.hisat.met.txt
-# │   │   ├── test1.sort.bam
-# │   │   ├── test2.hisat.met.txt
-# │   │   └── test2.sort.bam
-# │   └── res_stringtie
-# │       ├── ballgown
-# │       ├── gff
-# │       ├── mgff
-# │       └── tab
-# ├── alignment2
-# │   ├── res_hisat2
-# │   │   └── failalign
-# │   └── res_stringtie
-# │       ├── ballgown
-# │       ├── gff
-# │       ├── mgff
-# │       └── tab
-# ├── fastq
-# │   ├── test1_R1.fastq.gz
-# │   ├── test1_R2.fastq.gz
-# │   ├── test2_R1.fastq.gz
-# │   └── test2_R2.fastq.gz
-# └── qa
-#
-# 18 directories, 14 files
 }

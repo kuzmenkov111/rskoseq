@@ -23,7 +23,6 @@
 #' @importFrom ggplot2 ggplot aes geom_bar theme_bw theme element_text
 #' @importFrom grDevices dev.off pdf
 #' @importFrom graphics plot
-#' @importFrom rsko mstrings
 #' @importFrom tidyr gather
 #' @importFrom stats median
 #' @importFrom utils head
@@ -32,7 +31,7 @@ gg_qa <- function(fqdir,
                   suffix=".fastq.gz",
                   prefix =sub(suffix, "", list.files(fqdir, suffix)),
                   facet_col){
-  # fqdir <- "~/pub/dat/sampledata/rnaseq/project1/fastq";
+  # fqdir <- "~/pub/sampledata/rnaseq/project1/fastq";
   # suffix <- ".fastq.gz";
   # facet_col=2
 
@@ -43,11 +42,7 @@ gg_qa <- function(fqdir,
 
   # quarity assesment
   ## outputdir ----
-  qadir <-
-    paste0(
-      paste(lapply(strsplit(fqdir, "/"), function(x)head(x, length(x)-1))[[1]],
-                  collapse = "/"),
-      "/qa")
+  qadir <- paste0(dirname(fqdir),"/qa")
   if (!file.exists(qadir)){
     dir.create(qadir)
   } else if (file.exists(qadir) & !identical(list.files(qadir), character(0))){
@@ -70,7 +65,6 @@ gg_qa <- function(fqdir,
     smp <- prefix
   }
 
-
   ## read data frame ----
   readat <- data.frame(sample = smp,
                        read = qadat[["readCounts"]]$read)
@@ -79,19 +73,19 @@ gg_qa <- function(fqdir,
   read_gg <-
     ggplot2::ggplot(data = readat, ggplot2::aes(x = sample, y = read), fill = sample) +
     ggplot2::geom_bar(stat="identity") +
-    ggplot2::theme_bw(base_size = 15)+
+    ggplot2::theme_minimal(base_size = 15) +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1))
-
 
   # sequence content ----
   scdat <- qadat[["perCycle"]]$baseCall
   scdat$lane <- as.character(scdat$lane)
 
   ## lane name ----
-  scdat$lane <- rsko::mstrings(patterns = unique(as.character(scdat$lane)),
-                               target = as.character(scdat$lane),
-                               action = "mmsub",
-                               replacements = prefix )
+  patterns = unique(as.character(scdat$lane))
+  target = as.character(scdat$lane)
+  replacements = prefix
+  for(i in 1:2) target[target %in% patterns[i]] <- replacements[i]
+  scdat$lane <- target
 
   ## sequence content ----
   scrate <- scdat %>%
@@ -123,17 +117,15 @@ gg_qa <- function(fqdir,
     ggplot2::geom_point() +
     ggplot2::theme_bw(base_size = 15) +
     ggplot2::labs(y="N Content(%)") +
-    ggplot2::facet_wrap(~lane, ncol=2)
+    ggplot2::facet_wrap(~lane, ncol=5)
 
   # quality socre per sample
-  qsdat <- qadat[["perCycle"]]$quality
-  qsdat$lane <- as.character(qsdat$lane)
+  qsdat <- qadat[["perCycle"]]$quality %>%
+    mutate(lane=as.character(lane))
 
   ## replace the lane name by prefix ----
-  qsdat$lane <- rsko::mstrings(patterns = unique(as.character(qsdat$lane)),
-                               target = as.character(qsdat$lane),
-                               action = "mmsub",
-                               replacements = prefix )
+  patterns = unique(as.character(qsdat$lane))
+  for(i in 1:2) qsdat$lane[qsdat$lane %in% patterns[i]] <- prefix[i]
 
   qsds <- qsdat %>%
     dplyr::group_by(Cycle, lane) %>%
@@ -209,7 +201,5 @@ gg_qa <- function(fqdir,
   grDevices::pdf(paste0(qadir, "/", "qs_al.pdf"), width = 10, height = 5)
   print(qs_gg2)
   grDevices::dev.off()
-
-
 
 }

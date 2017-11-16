@@ -57,9 +57,9 @@ project_rnsq <- function(prjd, alnd="alignment1", algnr="hisat2"){
       dir.create(path = gffdir, recursive = T)
       dir.create(path = mgffdir, recursive = T)
 
-      ## command log file ----
-      logfile <- paste0(prjd, "/",alnd, "/", prjn, "_", alnd, "_", "log.txt")
-      file.create(logfile)
+      # ## command log file ----
+      # logfile <- paste0(prjd, "/",alnd, "/", prjn, "_", alnd, "_", "log.txt")
+      # file.create(logfile)
 
     }else if (algnr == "rsem"){
       ## res_rsem, stats, results, bam----
@@ -73,9 +73,9 @@ project_rnsq <- function(prjd, alnd="alignment1", algnr="hisat2"){
       dir.create(path = resdir, recursive = T)
       dir.create(path = bamdir, recursive = T)
 
-      ## command log file ----
-      logfile <- paste0(prjd, "/",alnd, "/", prjn, "_", alnd, "_", "log.txt")
-      file.create(logfile)
+      # ## command log file ----
+      # logfile <- paste0(prjd, "/",alnd, "/", prjn, "_", alnd, "_", "log.txt")
+      # file.create(logfile)
 
     }else if (algnr == "others"){
 
@@ -108,9 +108,9 @@ project_rnsq <- function(prjd, alnd="alignment1", algnr="hisat2"){
       dir.create(path = gffdir, recursive = T)
       dir.create(path = mgffdir, recursive = T)
 
-      ## command log file ----
-      logfile <- paste0(prjd, "/",alnd, "/", prjn, "_", alnd, "_", "log.txt")
-      file.create(logfile)
+      # # command log file ----
+      # logfile <- paste0(prjd, "/",alnd, "/", prjn, "_", alnd, "_", "log.txt")
+      # file.create(logfile)
 
     } else if (algnr == "rsem"){
       ## res_rsem, stats, results, bam----

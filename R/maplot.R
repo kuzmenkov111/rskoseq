@@ -1,4 +1,4 @@
-#' maplot
+#' MA-plot
 #' @description maplot
 #' @usage maplot(dat, fdr, gp1, gp2)
 #' @param dat dataframe: result of DEG analysis using 'tmm_cnt'
@@ -69,27 +69,7 @@ maplot <-function(dat, fdr = 0.05, gp1, gp2){
 
   } else if (class(dat)=="data.frame"){
     res_magg <- maplt(dat = dat, fdr = fdr, gp1 = gp1, gp2 = gp2)
-    res_magg
 
-    # base plot ----
-    # plot(dat$a.value, dat$m.value,
-    #      xlab = "A=(log2(gp2)+log2(gp1))/2",
-    #      ylab = "M=log2(gp2)-log2(gp1)",
-    #      pch=16, cex=0.3, main=title
-    #      )
-    # mtext(paste("gp1:", gp1, "   gp2:", gp2, sep = ""), cex = 0.8)
-    # #sigdat <- dat %>% filter(estimatedDEG ==1)
-    # sigdat <- dat %>% dplyr::filter(q.value < fdr)
-    #
-    # points(sigdat$a.value, sigdat$m.value, pch=16, cex=0.3, col="magenta")
-    # abline(h = 0, v = 0, lty=3)
-    # ndeg <- nrow(sigdat); nnondeg <- nrow(dat)-ndeg
-    # legend("topright", bg="transparent",
-    #        col=c("black", "magenta"), pch=16,box.lty = 0,
-    #        cex= 0.8,
-    #        c(paste0("non_DEG: ", nnondeg),
-    #          paste("DEG: ", ndeg, "\n",  "(FDR<", fdr, ")", sep=""))
-    # )
   }
 
   return(magg)

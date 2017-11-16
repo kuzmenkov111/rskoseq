@@ -7,12 +7,15 @@ Maintainer: Shogo Konishi <shkonishi@gmail.com>
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
 Imports: 
+    BiocGenerics,
+    Biostrings,
     dplyr, 
     ggplot2,
     ggplus,
     graphics,
-    rsko,
+    plyr,
     ShortRead, 
+    stringr,
     tidyr
 Depends: R (>= 2.10)
 License: GPL-3

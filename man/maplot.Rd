@@ -2,7 +2,7 @@
 % Please edit documentation in R/maplot.R
 \name{maplot}
 \alias{maplot}
-\title{maplot}
+\title{MA-plot}
 \usage{
 maplot(dat, fdr, gp1, gp2)
 }
