@@ -11,6 +11,8 @@ rep_hisat2(alndir, idx, fqdir, paired, suffix_fq, ...)
 
 \item{idx}{character: the fully path of hisat2 index name.}
 
+\item{project}{logical:default is TRUE}
+
 \item{fqdir}{character: the fully path of fastq files. The default is 'paste0(dirname(alndir), "/fastq")'.
 If this directory containing still analyzed fastq and additional fastq files,}
 

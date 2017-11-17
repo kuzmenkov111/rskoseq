@@ -83,6 +83,7 @@ rep_hisat2 <- function(alndir, idx, project = TRUE,
   # log files output under the alignment directory ----
   ## if alignment directory is not exists  ----
   if (!file.exists(alndir)){dir.create(path = alndir, recursive = T)}
+
   ## commando log file create ----
   aln <- basename(alndir)
   path_prj <- dirname(alndir)
@@ -113,6 +114,7 @@ rep_hisat2 <- function(alndir, idx, project = TRUE,
   ## if project truth, all result directory are still exists .
   ## Otherwise project is FALSE, all result files and directory are under the alignment directory
   if (project == TRUE){
+
     # argument check: alignment directory  exists or not ----
     if (!file.exists(alndir)){
       stop(paste0(" There is not alignment directory '", alndir, "'. \n"))
