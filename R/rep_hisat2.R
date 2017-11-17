@@ -1,10 +1,10 @@
 #' Replicate execution of read alignment using hisat2
 #' @description The NGS read alignment using hisat2 for multiple samples.
 #'     The input and output directory must be created by 'rskoseq::project_rnsq'.
-#' @usage rep_hisat2(alndir, idx, fqdir, paired, suffix_fq, ...)
+#' @usage rep_hisat2(alndir, idx, project, fqdir, paired, suffix_fq, ...)
 #' @param alndir character: the name of alignment directory. results output
 #' @param idx character: the fully path of hisat2 index name.
-#' @param project logical:default is TRUE
+#' @param project logical:default is TRUE. If does not create project directory using rskoseq::project_rnsq, it is FALSE
 #' @param fqdir character: the fully path of fastq files. The default is 'paste0(dirname(alndir), "/fastq")'.
 #'     If this directory containing still analyzed fastq and additional fastq files,
 #' @param paired logical: paired or single read. If paired end, the names of fastq file must be "_R1" and "_R2".
@@ -21,14 +21,15 @@
 #' # rep_hisat2(prjd = prj, idx = idx, paired=FALSE, alnd = "alignment2")
 #' @export
 # memo delete --
-# # project
-# alndir <- "~/pub/sampledata/rnaseq/project1/alignment1" # result output directory
+# # # project
+# alndir <- "~/pub/sampledata/rnaseq/project1/h2.171117" # result output directory
 # idx <- "~/db/index/hisat2_idx/CriGri_1.0"
 # fqdir <- paste0(dirname(alndir), "/fastq")
-# project <- TRUE # default
-# paired <- FALSE # default
-# suffix_fq <- ".fastq.gz" # default
-#
+# #project <- TRUE # default
+# #paired <- FALSE # default
+# #suffix_fq <- ".fastq.gz" # default
+# rep_hisat2(alndir, idx, paired=FALSE)
+
 # # no project
 # alndir <- "~/pub/sampledata/rnaseq/project1/aln_171112" # result output directory create
 # idx <- "~/db/index/hisat2_idx/CriGri_1.0" # hisat2 index
@@ -85,10 +86,11 @@ rep_hisat2 <- function(alndir, idx, project = TRUE,
   if (!file.exists(alndir)){dir.create(path = alndir, recursive = T)}
 
   ## commando log file create ----
+  datestrings <- gsub(":", ".", gsub(" ", "_", date()))
   aln <- basename(alndir)
   path_prj <- dirname(alndir)
   prjn <- basename(path_prj)
-  path_comlog <- paste0(alndir, "/", prjn, "_", aln,"_", "log.txt")
+  path_comlog <- paste0(alndir, "/", prjn, "_", aln,"_", datestrings,"_log.txt")
   file.create(path_comlog)
 
   ## open connection of command log file ----
@@ -96,7 +98,7 @@ rep_hisat2 <- function(alndir, idx, project = TRUE,
   writeLines(date(), con)
 
   ## hisat2 log file(created through hisat2 program) ----
-  com_h2log <- paste0(" 2>> ", alndir, "/hisat2_log_", gsub(" ", "_", date()), ".txt ")
+  com_h2log <- paste0(" 2>> ", alndir, "/hisat2_log_", datestrings, ".txt ")
 
   ## detect cores ----
   cores <- parallel::detectCores()
@@ -114,7 +116,6 @@ rep_hisat2 <- function(alndir, idx, project = TRUE,
   ## if project truth, all result directory are still exists .
   ## Otherwise project is FALSE, all result files and directory are under the alignment directory
   if (project == TRUE){
-
     # argument check: alignment directory  exists or not ----
     if (!file.exists(alndir)){
       stop(paste0(" There is not alignment directory '", alndir, "'. \n"))
@@ -194,6 +195,7 @@ rep_hisat2 <- function(alndir, idx, project = TRUE,
 
       # execute command ----
       if (paired == TRUE){ ## paired end
+        ## command text ----
         com <- paste0(hs2c, " -p ", cores, " -x ", idx,
                       " --un-conc-gz ", failaln,
                       " --met-file ", metfile,
@@ -215,6 +217,7 @@ rep_hisat2 <- function(alndir, idx, project = TRUE,
         writeLines(com, con)
 
       } else if (paired == FALSE){ # single
+        ## command text ----
         com <- paste0(hs2c, " -p ", cores, " -x ", idx,
                       " --un-conc-gz ", failaln,
                       " --met-file ", metfile,
@@ -237,7 +240,7 @@ rep_hisat2 <- function(alndir, idx, project = TRUE,
   } else {
     stop("fail")
   }
-
+  close(con)
 }
 
 

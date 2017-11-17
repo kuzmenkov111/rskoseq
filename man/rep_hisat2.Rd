@@ -4,14 +4,14 @@
 \alias{rep_hisat2}
 \title{Replicate execution of read alignment using hisat2}
 \usage{
-rep_hisat2(alndir, idx, fqdir, paired, suffix_fq, ...)
+rep_hisat2(alndir, idx, project, fqdir, paired, suffix_fq, ...)
 }
 \arguments{
 \item{alndir}{character: the name of alignment directory. results output}
 
 \item{idx}{character: the fully path of hisat2 index name.}
 
-\item{project}{logical:default is TRUE}
+\item{project}{logical:default is TRUE. If does not create project directory using rskoseq::project_rnsq, it is FALSE}
 
 \item{fqdir}{character: the fully path of fastq files. The default is 'paste0(dirname(alndir), "/fastq")'.
 If this directory containing still analyzed fastq and additional fastq files,}

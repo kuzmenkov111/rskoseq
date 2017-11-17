@@ -4,20 +4,18 @@
 \alias{rep_stringtie}
 \title{Consecutive execution of Transcript assembly and quantification for RNA-Seq using stringtie}
 \usage{
-rep_stringtie(prjd, alnd ,suffix_bam, guide_gff, res_dir, ...)
+rep_stringtie(bamdir,suffix_bam, guide_gff, res_dir, ...)
 }
 \arguments{
-\item{prjd}{character: project directory path, created by 'rskoseq::project_rnsq'}
-
-\item{alnd}{character: the name of alignment directory, sorted-bam files searched from under this directory.
-the default is "alignment1". If designate your own sorted-bam containing directory, give the path of the directory
-and 'res_dir' must be directory name under the 'alnd'. E.g. alnd= "~/bamdir"; res_dir= "res_stringtie"}
+\item{bamdir}{character: the name of alignment directory, sorted-bam files searched from under this directory.
+If designate your own sorted-bam containing directory, give the path of the directory
+and 'res_dir' must be directory name under the 'bamdir'.}
 
 \item{suffix_bam}{character: The default is ".sort.bam".}
 
 \item{guide_gff}{The file path of guide gff.}
 
-\item{res_dir}{output directory path, the default is 'paste0(prjd, "/res_stringtie")'}
+\item{res_dir}{output directory path, the default is 'paste0(dirname(bamdir), "/res_stringtie")'}
 
 \item{...}{additional options of stringtie. E.g. "-e"}
 }
@@ -27,8 +25,8 @@ Consecutive processiong of stringtie for multiple samples, then FPKM and cov dat
 }
 \examples{
 #
-# prj <- "~/pub/dat/sampledata/rnaseq/project1"
-# guide <- "~/db/index/hisat2_idx/SD0218_11_a_contig01.gff"
-# bamdir <- "alignment1"
-# rep_stringtie(prjd=prj, alnd=bamdir, guide_gff=guide, ... = "-p 8")
+# bamdir <- "~/pub/sampledata/rnaseq/project1/h2.171117/res_hisat2"
+# guide "~/db/index/hisat2_idx/CriGri_1.0.gff3"
+# res_dir <-
+# rep_stringtie(bamdir=bamdir, guide_gff=guide, ... = "-p 8")
 }

@@ -10,6 +10,7 @@
 #' # alnd <- "~/pub/sampledata/rnaseq/project1/rsem1/"
 #' # prj <- "~/pub/sampledata/rnaseq/project1"
 #' # rep_rsem(path_prj = prj, alnd = alnd, idx_name=idx)
+#' @importFrom dplyr select arrange
 #' @importFrom parallel detectCores
 #' @importFrom readr read_delim
 #' @export
@@ -51,9 +52,10 @@ rep_rsem <- function(path_aln, idx_name, suffix_fq=".fastq.gz"){
   # system(paste0(system("which samtools", intern=T), " --version"), intern = T)[[1]]
 
   ## command log file ----
+  datestrings <- gsub(":", ".", gsub(" ", "_", date()))
   path_comlog <- list.files(path_aln, "log.txt", full.names = T)
   if (identical(path_comlog, character(0))){
-    path_comlog <- paste0(path_aln, "/", prjn, "_", alnd, "_log.txt")
+    path_comlog <- paste0(path_aln, "/", prjn, "_", alnd, "_", datestrings, "_log.txt")
     file.create(path_comlog)
   }
 
@@ -65,6 +67,7 @@ rep_rsem <- function(path_aln, idx_name, suffix_fq=".fastq.gz"){
   con <- file(path_comlog, "a")
   writeLines("# rsem", con)
 
+  ## execute command ----
   for(i in seq_along(path_fq)){
     com <- paste(rsem, "--bowtie2 --sort-bam-by-coordinate -p",
                  cores,
@@ -74,18 +77,21 @@ rep_rsem <- function(path_aln, idx_name, suffix_fq=".fastq.gz"){
     cat(paste0(com, " \n"))
     writeLines(com, con)
   }
+
+  ## close connection of command-log file ----
   close(con)
 
   # file manipulation
   ## result files removed to ./resdir ----
-  ## fpkm
+  ## merge results files  ----
+  transcript_id <- NULL;
   gen <- list.files(".", ".genes.results")
   iso <- list.files(".", ".isoforms.results")
   ifpkms <- lapply(seq_along(iso), function(i) {
     readr::read_delim(iso[i], delim="\t", col_names=T) %>%
-      select("transcript_id", "FPKM") %>%
+      dplyr::select("transcript_id", "FPKM") %>%
       setNames(., c("transcript_id", sub("_R1.isoforms.results", "", iso[i]))) %>%
-      arrange(transcript_id)
+      dplyr::arrange(transcript_id)
   })
   ifpkm <- data.frame(transcript_id=ifpkms[[1]]$transcript_id,
                       do.call(cbind, lapply(ifpkms, function(x)x[,2])),
@@ -93,7 +99,7 @@ rep_rsem <- function(path_aln, idx_name, suffix_fq=".fastq.gz"){
   ## ecount
   iecnts <- lapply(seq_along(iso), function(i) {
     readr::read_delim(iso[i], delim="\t", col_names=T) %>%
-      select("transcript_id", "expected_count") %>%
+      dplyr::select("transcript_id", "expected_count") %>%
       setNames(., c("transcript_id", sub("_R1.isoforms.results", "", iso[i])))
   })
   iecnt <- data.frame(transcript_id=iecnts[[1]]$transcript_id,
@@ -104,12 +110,12 @@ rep_rsem <- function(path_aln, idx_name, suffix_fq=".fastq.gz"){
   ## gfpkm
   gfpkms <- lapply(seq_along(iso), function(i) {
     readr::read_delim(gen[i], delim="\t", col_names=T) %>%
-      select("gene_id", "FPKM") %>%
+      dplyr::select("gene_id", "FPKM") %>%
       setNames(., c("gene_id", sub("_R1.genes.results", "", gen[i])))
   })
   gecnts <- lapply(seq_along(iso), function(i) {
     readr::read_delim(gen[i], delim="\t", col_names=T) %>%
-      select("gene_id", "expected_count") %>%
+      dplyr::select("gene_id", "expected_count") %>%
       setNames(., c("gene_id", sub("_R1.genes.results", "", gen[i])))
   })
 

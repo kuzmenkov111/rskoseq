@@ -14,6 +14,7 @@ Imports:
     ggplus,
     graphics,
     plyr,
+    readr,
     ShortRead, 
     stringr,
     tidyr

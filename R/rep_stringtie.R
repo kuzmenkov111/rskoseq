@@ -1,37 +1,32 @@
 #' Consecutive execution of Transcript assembly and quantification for RNA-Seq using stringtie
 #' @description Consecutive processiong of stringtie for multiple samples, then FPKM and cov data table are created.
 #'    Execution following from 'rskoseq::project_rnsq', 'rskoseq::rep_hisat2'.
-#' @usage rep_stringtie(prjd, alnd ,suffix_bam, guide_gff, res_dir, ...)
-#' @param prjd character: project directory path, created by 'rskoseq::project_rnsq'
-#' @param alnd character: the name of alignment directory, sorted-bam files searched from under this directory.
-#'     the default is "alignment1". If designate your own sorted-bam containing directory, give the path of the directory
-#'     and 'res_dir' must be directory name under the 'alnd'. E.g. alnd= "~/bamdir"; res_dir= "res_stringtie"
-#'
+#' @usage rep_stringtie(bamdir,suffix_bam, guide_gff, res_dir, ...)
+#' @param bamdir character: the name of alignment directory, sorted-bam files searched from under this directory.
+#'     If designate your own sorted-bam containing directory, give the path of the directory
+#'     and 'res_dir' must be directory name under the 'bamdir'.
 #' @param suffix_bam character: The default is ".sort.bam".
 #' @param guide_gff The file path of guide gff.
-#' @param res_dir output directory path, the default is 'paste0(prjd, "/res_stringtie")'
+#' @param res_dir output directory path, the default is 'paste0(dirname(bamdir), "/res_stringtie")'
 #' @param ... additional options of stringtie. E.g. "-e"
 #' @examples #
-#' # prj <- "~/pub/dat/sampledata/rnaseq/project1"
-#' # guide <- "~/db/index/hisat2_idx/SD0218_11_a_contig01.gff"
-#' # bamdir <- "alignment1"
-#' # rep_stringtie(prjd=prj, alnd=bamdir, guide_gff=guide, ... = "-p 8")
+#' # bamdir <- "~/pub/sampledata/rnaseq/project1/h2.171117/res_hisat2"
+#' # guide "~/db/index/hisat2_idx/CriGri_1.0.gff3"
+#' # rep_stringtie(bamdir=bamdir, guide_gff=guide, ... = "-p 8")
 #' @importFrom utils tail write.table read.table
 #' @export
-rep_stringtie <- function(prjd,
-                          alnd = "alignment1",
+rep_stringtie <- function(bamdir,
                           suffix_bam=".sort.bam", guide_gff,
-                          res_dir=paste0(prjd, "/", alnd, "/res_stringtie"), ...){
+                          res_dir=paste0(dirname(bamdir), "/res_stringtie"), ...){
   # argument check: stringtie program PATH ----
   if (!any(grep("stringtie", unlist(strsplit(Sys.getenv("PATH"), ":"))))){
     stop("There is not stringtie program, or the PATH does not found.")
   }
 
   # argument check: project directory and project name ----
-  if(!file.exists(prjd)){
-    stop(paste0("\'", prjd, "\'", " does not found."))
+  if(!file.exists(bamdir)){
+    stop(paste0("\'", bamdir, "\'", " does not found."))
   }
-  prjn <- sapply(strsplit(prjd, "/"), function(x)tail(x,1))
 
   # argument check: guide_gff ----
   if (!file.exists(guide_gff)){
@@ -39,20 +34,14 @@ rep_stringtie <- function(prjd,
   }
 
   # argument check: path of sorted bam files and get all samples name----
-  bam_dir <- paste0(prjd, "/", alnd, "/res_hisat2")
-  if (file.exists(bam_dir)){
-    bamfls <- list.files(bam_dir, suffix_bam, full.names = T)
+  if (file.exists(bamdir)){
+    bamfls <- list.files(bamdir, suffix_bam, full.names = T)
     if (identical(bamfls, character(0))){
-      stop(paste0("There is not '.srot.bam' files in ", bam_dir,
+      stop(paste0("There is not '.srot.bam' files in ", bamdir,
                   ", or the suffix of these bam files is different from '",  suffix_bam, "'."))
     }
-  } else if (!file.exists(bam_dir) & file.exists(alnd)){
-    bamfls <- list.files(alnd, suffix_bam, full.names = T)
-    if (identical(bamfls, character(0))){
-      stop(paste0("There is not '.srot.bam' files in ", alnd,
-                  ", or the suffix of these bam files is different from '",  suffix_bam, "'."))
-    }
-    res_dir <- paste0(alnd, "/", res_dir)
+  } else {
+    stop(paste0("There is not ", bamdir))
   }
 
   # collect sample names from bam files, and create path of result gff files. ----
@@ -67,16 +56,15 @@ rep_stringtie <- function(prjd,
     add_op <- ""
   }
 
-  # stringtie execution ----
-  ## command log maked by rskoseq::project_rnsq or newly creaion. ----
-  logfile  <-  list.files(paste0(prjd, "/", alnd), "log.txt", full.names = T)
-  if (identical(logfile, character(0))){
-    logfile <- paste0(prjd, "/",alnd, "/", prjn, "_", alnd, "_", "log.txt")
-    file.create(logfile)
-  }
-  ## open connection of
-  con <- file(logfile, "a")
-  writeLines("# stringtie", con)
+  # stringtie execution
+  ## commando log file create ----
+  datestrings <- gsub(":", ".", gsub(" ", "_", date()))
+  path_comlog <- paste0(dirname(bamdir),"/stringtie_", datestrings,"_log.txt")
+  file.create(path_comlog)
+
+  ## open path_comlog of ----
+  con <- file(path_comlog, "a")
+  writeLines(date(), con)
 
   ## detect cores ----
   cores <- parallel::detectCores()
@@ -100,7 +88,7 @@ rep_stringtie <- function(prjd,
 
   ## stringtie --merge ----
   com2 <- paste0("stringtie --merge -G ", guide_gff, " -o ", res_dir, "/merged.gff ", out_f)
-  system(com2)
+  system(com2, wait = T)
 
   ## over write command log ----
   writeLines(paste0("# stringtie --merge \n", com2), con)
@@ -151,6 +139,8 @@ rep_stringtie <- function(prjd,
   cov <- Reduce(f, cov_list)
 
   # output file ----
+  prjn <- basename(dirname((dirname(bamdir))))
+  alnd <- basename(dirname(bamdir))
   fpkmout <- paste0(res_dir, "/", prjn, "_", alnd, "_FPKM.txt")
   covout <- paste0(res_dir, "/", prjn, "_", alnd, "_cov.txt")
 
