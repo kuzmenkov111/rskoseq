@@ -2,7 +2,7 @@
 % Please edit documentation in R/kmer_cnt.R
 \name{kmer_cnt}
 \alias{kmer_cnt}
-\title{Counting kmer of nucleotide sequenc}
+\title{Counting kmer of nucleotide sequence}
 \usage{
 kmer_cnt(filepath, format, k, n, per_site)
 }

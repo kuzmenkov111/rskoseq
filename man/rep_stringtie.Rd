@@ -27,6 +27,5 @@ Consecutive processiong of stringtie for multiple samples, then FPKM and cov dat
 #
 # bamdir <- "~/pub/sampledata/rnaseq/project1/h2.171117/res_hisat2"
 # guide "~/db/index/hisat2_idx/CriGri_1.0.gff3"
-# res_dir <-
 # rep_stringtie(bamdir=bamdir, guide_gff=guide, ... = "-p 8")
 }
