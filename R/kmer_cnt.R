@@ -1,4 +1,4 @@
-#' Counting kmer of nucleotide sequenc
+#' Counting kmer of nucleotide sequence
 #' @description kmer counting from fastq or fasta format file and return kmer table
 #' @usage kmer_cnt(filepath, format, k, n, per_site)
 #' @return kmer table or kmer count at position
