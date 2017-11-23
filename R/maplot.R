@@ -12,21 +12,28 @@ maplot <-function(dat, fdr = 0.05, gp1, gp2){
   # dat <- deg_list
 
   # argument check: dat ----
-  vcols <- grDevices::adjustcolor(col = c("magenta", "gray30"), alpha.f = 0.5)
+  vcols <- grDevices::adjustcolor(col = c("gray30","magenta","blue"), alpha.f = 0.5)
   A <- NULL; M <- NULL; a.value <- NULL; m.value <- NULL
 
   # maplot function ----
-  maplt <- function(dat, fdr, gp1, gp2){
-    # graph title
+  maplt <- function(dat, fdr, gp1, gp2,
+                    vcols=grDevices::adjustcolor(col = c("magenta", "gray30"), alpha.f = 0.5)){
+    # graph title ----
     comp <- paste0("gp1: ", gp1, "   gp2: ", gp2)
     # number of deg or non-deg ----
     nsig <- sum(dat$q.value < fdr); nnsig <- sum(dat$q.value >= fdr)
     lab_sig <- paste0("DEG:", nsig); lab_nsig <- paste0("non-DEG:", nnsig)
-    # colour for significant genes
+    # colour for significant genes ----
     sig <- factor(ifelse(dat$q.value < fdr, lab_sig, lab_nsig),
                   levels = c(lab_sig, lab_nsig))
-    # ggplot
-    magg <- ggplot2::ggplot(dat, aes(x = a.value, y = m.value, colour=sig )) +
+
+    cols = NULL
+    sigdat <- dat %>%
+      dplyr::mutate(cols = factor(ifelse(dat$q.value <= fdr & m.value < 0, "down",
+                                      ifelse(dat$q.value <= fdr & m.value > 0, "up", "non-DEG")),
+                               levels = c("non-DEG", "up", "down")))
+    # ggplot ----
+    magg <- ggplot2::ggplot(sigdat, aes(x = a.value, y = m.value, colour=cols )) +
       ggplot2::geom_point(size=0.3) +
       ggplot2::labs(x="A=(log2(gp2)+log2(gp1))/2", y= "M=log2(gp2)-log2(gp1)",
                     colour="", title = comp) +
@@ -35,7 +42,6 @@ maplot <-function(dat, fdr = 0.05, gp1, gp2){
       ggplot2::theme(legend.position = c(.85, .85),
                      legend.text = element_text(size = 15),
                      legend.key.size = grid::unit(3.0, "lines"))
-
     return(magg)
   }
 
@@ -65,7 +71,6 @@ maplot <-function(dat, fdr = 0.05, gp1, gp2){
       ggplot2::theme(strip.background = element_rect(colour="white", fill="white"),
                      legend.position="none") +
       ggplot2::facet_wrap(~comp, ncol=3)
-
 
   } else if (class(dat)=="data.frame"){
     res_magg <- maplt(dat = dat, fdr = fdr, gp1 = gp1, gp2 = gp2)
