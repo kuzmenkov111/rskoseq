@@ -11,7 +11,7 @@
 #' @param ... additional options of stringtie. E.g. "-e"
 #' @examples #
 #' # bamdir <- "~/pub/sampledata/rnaseq/project1/h2.171117/res_hisat2"
-#' # guide "~/db/index/hisat2_idx/CriGri_1.0.gff3"
+#' # guide "~/db/index/hisat2_idx/Cricetulus_griseus_crigri.CriGri_1.0.90.gff3"
 #' # rep_stringtie(bamdir=bamdir, guide_gff=guide, ... = "-p 8")
 #' @importFrom utils tail write.table read.table
 #' @export

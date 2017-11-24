@@ -12,12 +12,12 @@
 #' @param ... additional hisat2 options. E.g.  "--no-spliced-alignment"
 #' @importFrom utils tail
 #' @examples # # arguments ----
+#' ## project TRUE (all result created at directories predetermined by 'project_rnsq')
 #' # alndir <- "~/pub/sampledata/rnaseq/project1/alignment1"
-#' # idx <- "~/db/index/hisat2_idx"
-#' # # excution ----
-#' # rep_hisat2(prjd = prj, idx = idx, paired=TRUE, ...="--no-spliced-alignment")
+#' # idx <- "~/db/index/hisat2_idx/CriGri_1.0.ens"
+#' # rep_hisat2(alndir = alndir, idx = idx, paired=F)
 #'
-#' # # if all result create under the alignment directory
+#' ## project FALSE (all result create under the alignment directory)
 #' # rep_hisat2(prjd = prj, idx = idx, paired=FALSE, alnd = "alignment2")
 #' @export
 # memo delete --
