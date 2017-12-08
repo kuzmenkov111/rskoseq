@@ -24,8 +24,8 @@ kmer table or kmer count at position
 kmer counting from fastq or fasta format file and return kmer table
 }
 \examples{
-# fastq which reads are same
-fq <- list.files(system.file("extdata/E-MTAB-1147", package = "ShortRead"), full.names = TRUE)
-kmer_dat1 <- kmer_cnt(filepath = fq[1], format = "fastq", k = 7, per_site = TRUE)
+## fastq which reads are same
+# fq <- list.files(system.file("extdata/E-MTAB-1147", package = "ShortRead"), full.names = TRUE)
+# kmer_dat1 <- kmer_cnt(filepath = fq[1], format = "fastq", k = 7, per_site = TRUE)
 # kmer_dat2 <- kmer_cnt(filepath = fq[1], format = "fastq", k = 7, per_site = FALSE)
 }
