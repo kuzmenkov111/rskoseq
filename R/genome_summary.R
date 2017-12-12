@@ -5,7 +5,7 @@
 #' @param N numeric vector: If calcuration for N90(L90), N50(L50), and N10(L10), N = c(90, 50, 10)
 #' @param genome numeric: genome size. The default is NULL. The genome size is calculated from the sum of the widths of the input fasta files.
 #' @examples
-#' # fas <- system.file("extdata/L_casei_bl23.ASM2648v1.dna.toplevel.fa.gz", package = "rskodat")
+#' # fas <- "~/db/genome/TAIR10/Arabidopsis_thaliana.TAIR10.dna.toplevel.fa.gz"
 #' # genome_summary(in_f = fas, N=c(90,50,10))
 #' @importFrom Biostrings readDNAStringSet width alphabetFrequency
 #'

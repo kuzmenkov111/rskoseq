@@ -1,18 +1,22 @@
 #' Calcuration of N50 and L50 from genome sequence.
-#' @description Calculation of N50 and L50 from genomic sequence in fasta format
+#' @description Calculation of N50 and L50 from genomic sequence in fasta format.
+#' If the genomic sequence is pseudo chromosomes
 #' @usage nx(in_f, N, genome)
 #' @param in_f The input file path with fasta format, or DNAStringSet object from Biostrings package.
 #' @param N numeric vector: If calcuration for N90(L90), N50(L50), and N10(L10), N = c(90, 50, 10)
 #' @param genome numeric: genome size. The default is NULL. The genome size is calculated from the sum of the widths of the input fasta files.
 #' @examples
 #'
-#' # fas <- system.file("extdata/L_casei_bl23.ASM2648v1.dna.toplevel.fa.gz",
-#' #                    package = "rskodat")
-#' # nx(in_f = fas, N = c(90,50,10), genome=NULL)
+#' # fas <- "~/db/genome/TAIR10/Arabidopsis_thaliana.TAIR10.dna.toplevel.fa.gz"
+#' # nx(in_f = fas, N = 50, genome=NULL)
 #'
 #' @importFrom Biostrings readDNAStringSet width
 #' @export
 nx <- function(in_f, N, genome=NULL){
+  # length 'N' must be 1 ----
+  if (length(N) != 1){
+    stop("'N' must be a vector of length 1")
+  }
   # read fasta file ----
   if (class(in_f) == "DNAStringSet"){
     seq <- in_f
