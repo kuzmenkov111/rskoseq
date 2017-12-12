@@ -1,20 +1,20 @@
-#' Quality assesment with ShortRead package and return ggplot object.
-#' @description This functions returns ggplot objects and create data.frame of GC content per read
-#' @usage gc_read(fqdir, suffix, prefix, facet_col)
-#' @param fqdir A vector of file path of fastq files, or dir path, containing fastq files
+#' GC content per read
+#' @description This functions returns ggplot objects of GC content per read
+#' @usage gc_read(fqdir, outdir, suffix, prefix, facet_col)
+#' @param fqdir character: The file path of fastq files, or dir path, containing fastq files
+#' @param outdir output directory
 #' @param suffix A pattern of fastq file suffix. The default is ".fastq.gz"
 #' @param prefix A vector of samples name. The default values are names of fastq files containing in fqdir, which substitute 'suffix' character.
 #' @param facet_col facet of sequence content and quality score per sample plot.
 #' @return  The list of ggplot objects returns and write.table for quality assesment with 'qa'.
 #' @examples
 #' ## arguments
-#' # p <- system.file("extdata/E-MTAB-1147", package = "ShortRead")
-#' # sffx <- ".fastq.gz"
-#' # fqs <- list.files(p, sffx)
-#' # prfx <- sapply(strsplit(fqs, "/"), function(x)sub(sffx, "", tail(x, n=1)))
+#' # fqdir <- system.file("extdata/E-MTAB-1147", package = "ShortRead")
+#' # suffix <- ".fastq.gz"
+#' # outdir <- "~/pub/sampledata/rnaseq/project1/qa"
 #'
 #' ## execution
-#' # res_qa <- gc_read(fqdir=p, suffix=sffx, prefix=prfx, facet_col=2)
+#' # res_qa <- gc_read(fqdir, outdir, suffix, facet_col=2)
 #' # do.call(gridExtra::grid.arrange, c(res_qa, list(ncol=2)))
 #'
 #' @importFrom ShortRead FastqSampler yield sread
@@ -26,6 +26,7 @@
 #' @export
 
 gc_read <- function(fqdir,
+                    outdir,
                     suffix=".fastq.gz",
                     prefix =sub(suffix, "", list.files(fqdir, suffix)),
                     facet_col){
@@ -33,12 +34,15 @@ gc_read <- function(fqdir,
   if (!all(file.exists(fqdir))){
     stop("I cannot find these all files.")
   }
+  if (!file.exists(outdir)){
+    dir.create(outdir)
+    print(paste( "'", outdir, "'", "was created."))
+  }
 
   # fastq files ----
   fqs <- list.files(fqdir, suffix, full.names = T)
-  if (identical(fqs, character(0))){
-    stop(paste0("There is not fastq files in ", fqdir))
-
+  if (identical(fqs, character(0)) & all(file.exists(fqdir))){
+    fqs <- fqdir
   }
 
   # function: gc sampler ----
@@ -58,7 +62,7 @@ gc_read <- function(fqdir,
     return(d)
   }
 
-  # data.frame of GC content per read
+  # data.frame of GC content per read ----
   GC=NULL; count=NULL; nOccurrences=NULL; nReads=NULL; `nReads(%)`=NULL
 
   gc_dat <- lapply(fqs, function(x)gc_sampler(file_path = x)) %>%
@@ -67,15 +71,25 @@ gc_read <- function(fqdir,
     tidyr::gather(., key="sample", value="GC")
 
   # ggplot ----
-  gggc <- ggplot2::ggplot(gc_dat, ggplot2::aes(x=GC)) +
+  gc_gg <- ggplot2::ggplot(gc_dat, ggplot2::aes(x=GC)) +
     ggplot2::geom_histogram(bins = 20, alpha=0.5) +
     ggplot2::theme_bw(base_size = 15)+
     ggplot2::labs(x="GC(%)")+
     ggplot2::facet_wrap(~sample, ncol=facet_col)
 
+  # pdf
+  if (length(unique(gc_dat$sample)) > 48){
+    grDevices::pdf(paste0(outdir, "/", "gc.pdf"), width = 10, height = 5)
+    sc <- ggplus::facet_multiple(plot=gc_gg, facets="sample", ncol = 8, nrow = 6)
+    grDevices::dev.off()
+
+  } else {
+    grDevices::pdf(paste0(outdir, "/", "gc.pdf"), width = 10, height = 5)
+    print(gc_gg)
+    grDevices::dev.off()
+  }
+
   # return ----
-  return(gggc)
+  return(gc_gg)
 }
-
-
 

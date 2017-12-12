@@ -146,7 +146,7 @@ gg_qa <- function(fqdir,
 
 
   # frequentSequences ----
-  ##
+  ## initialize of tbl object columns ----
   count=NULL; nReads=NULL; nOccurrences=NULL; `nReads(%)`=NULL
 
   ## tbl object: top10 frequentSequences ----

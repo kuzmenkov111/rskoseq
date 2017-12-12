@@ -2,12 +2,14 @@
 % Please edit documentation in R/gc_read.R
 \name{gc_read}
 \alias{gc_read}
-\title{Quality assesment with ShortRead package and return ggplot object.}
+\title{GC content per read}
 \usage{
-gc_read(fqdir, suffix, prefix, facet_col)
+gc_read(fqdir, outdir, suffix, prefix, facet_col)
 }
 \arguments{
-\item{fqdir}{A vector of file path of fastq files, or dir path, containing fastq files}
+\item{fqdir}{character: The file path of fastq files, or dir path, containing fastq files}
+
+\item{outdir}{output directory}
 
 \item{suffix}{A pattern of fastq file suffix. The default is ".fastq.gz"}
 
@@ -19,17 +21,16 @@ gc_read(fqdir, suffix, prefix, facet_col)
 The list of ggplot objects returns and write.table for quality assesment with 'qa'.
 }
 \description{
-This functions returns ggplot objects and create data.frame of GC content per read
+This functions returns ggplot objects of GC content per read
 }
 \examples{
 ## arguments
-# p <- system.file("extdata/E-MTAB-1147", package = "ShortRead")
-# sffx <- ".fastq.gz"
-# fqs <- list.files(p, sffx)
-# prfx <- sapply(strsplit(fqs, "/"), function(x)sub(sffx, "", tail(x, n=1)))
+# fqdir <- system.file("extdata/E-MTAB-1147", package = "ShortRead")
+# suffix <- ".fastq.gz"
+# outdir <- "~/pub/sampledata/rnaseq/project1/qa"
 
 ## execution
-# res_qa <- gc_read(fqdir=p, suffix=sffx, prefix=prfx, facet_col=2)
+# res_qa <- gc_read(fqdir, outdir, suffix, facet_col=2)
 # do.call(gridExtra::grid.arrange, c(res_qa, list(ncol=2)))
 
 }
