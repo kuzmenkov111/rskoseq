@@ -1,10 +1,11 @@
 #' Quality assesment with ShortRead package and return ggplot object.
 #' @description This functions returns ggplot objects and create report of qa. The qa report is created at above of the fastq directory.
-#' @usage gg_qa(fqdir, suffix, prefix, facet_col)
+#' @usage gg_qa(fqdir, suffix, prefix, facet_col, outdir)
 #' @param fqdir A vector of file path of fastq files, or dir path, containing fastq files
 #' @param suffix A pattern of fastq file suffix. The default is ".fastq.gz"
 #' @param prefix A vector of samples name. The default values are names of fastq files containing in fqdir, which substitute 'suffix' character.
 #' @param facet_col facet of sequence content and quality score per sample plot.
+#' @param outdir output directory. The default values is same at fqdir.
 #' @return  The list of ggplot objects returns and write.table for quality assesment with 'qa'.
 #' @examples
 #' ## arguments
@@ -13,7 +14,7 @@
 #' # prfx <- sub(sffx,"",list.files(p, sffx))
 #'
 #' ## execution
-#' # res_qa <- gg_qa(fqdir=p, suffix=sffx, prefix=prfx, facet_col=2)
+#' # res_qa <- rskoseq::gg_qa(fqdir=p, suffix=sffx, prefix=prfx, facet_col=2)
 #' # do.call(gridExtra::grid.arrange, c(res_qa, list(ncol=2)))
 #'
 #' @importFrom ShortRead qa report
@@ -27,9 +28,10 @@
 #' @importFrom utils head
 #' @export
 gg_qa <- function(fqdir,
-                  suffix=".fastq.gz",
-                  prefix =sub(suffix, "", list.files(fqdir, suffix)),
-                  facet_col){
+                  suffix = ".fastq.gz",
+                  prefix = sub(suffix, "", list.files(fqdir, suffix)),
+                  facet_col,
+                  outdir = paste0(dirname(fqdir),"/qa")){
   # fqdir <- "~/pub/sampledata/rnaseq/project1/fastq";
   # suffix <- ".fastq.gz";
   # prefix =sub(suffix, "", list.files(fqdir, suffix))
@@ -42,16 +44,15 @@ gg_qa <- function(fqdir,
 
   # quarity assesment
   ## outputdir ----
-  qadir <- paste0(dirname(fqdir),"/qa")
-  if (!file.exists(qadir)){
-    dir.create(qadir)
-  } else if (file.exists(qadir) & !identical(list.files(qadir), character(0))){
-    stop(paste("There is some file at ", qadir))
+  if (!file.exists(outdir)){
+    dir.create(outdir)
+  } else if (file.exists(outdir) & !identical(list.files(outdir), character(0))){
+    stop(paste("There is some file at ", outdir))
   }
 
   ## execute qa and reporting ----
   qadat <- ShortRead::qa(dirPath = fqdir)
-  ShortRead::report(qadat, dest = paste0(qadir, "/report"))
+  ShortRead::report(qadat, dest = paste0(outdir, "/report"))
 
 
   # initialize of tbl object columns ----
@@ -158,7 +159,7 @@ gg_qa <- function(fqdir,
   ## fasta object: top10 frequentSequences ----
   freqSeq_fna <- setNames(Biostrings::DNAStringSet(freqSeq_top10$sequence),
                           paste(freqSeq_top10$lane, freqSeq_top10$count, sep="|"))
-  Biostrings::writeXStringSet(x = freqSeq_fna, filepath = paste0(qadir, "/freqSeq.fna"))
+  Biostrings::writeXStringSet(x = freqSeq_fna, filepath = paste0(outdir, "/freqSeq.fna"))
 
   ## tbl object: top10 sequenceDistribution ----
   freqSeq_dat <- qadat[["sequenceDistribution"]] %>%
@@ -183,59 +184,59 @@ gg_qa <- function(fqdir,
 
 
   # write.table ----
-  fls <- paste0(qadir, c("/readat.txt", "/scrate.txt", "/qsdat.txt", "/freqSeq.txt"))
+  fls <- paste0(outdir, c("/readat.txt", "/scrate.txt", "/qsdat.txt", "/freqSeq.txt"))
   invisible(lapply(seq_along(fls), function(i){
     write.table(df_list[[i]], fls[[i]], sep="\t", quote = F, col.names = T, row.names = F)
   }))
 
   # save pdf ----
   ## read ----
-  grDevices::pdf(paste0(qadir, "/", "read.pdf"), width = 10, height = 5)
+  grDevices::pdf(paste0(outdir, "/", "read.pdf"), width = 10, height = 5)
   print(read_gg)
   grDevices::dev.off()
 
   ## sc per sample ----
   if (nrow(readat) > 48){
-    grDevices::pdf(paste0(qadir, "/", "sc.pdf"), width = 10, height = 5)
+    grDevices::pdf(paste0(outdir, "/", "sc.pdf"), width = 10, height = 5)
     sc <- ggplus::facet_multiple(plot=sc_gg, facets="lane", ncol = 8, nrow = 6)
     grDevices::dev.off()
 
   } else {
-    grDevices::pdf(paste0(qadir, "/", "sc_s.pdf"), width = 10, height = 5)
+    grDevices::pdf(paste0(outdir, "/", "sc_s.pdf"), width = 10, height = 5)
     print(sc_gg)
     grDevices::dev.off()
   }
 
   ## sc per base ----
-  grDevices::pdf(paste0(qadir, "/", "sc_b.pdf"), width = 10, height = 5)
+  grDevices::pdf(paste0(outdir, "/", "sc_b.pdf"), width = 10, height = 5)
   print(sc_gg2)
   grDevices::dev.off()
 
   ## qs per sample ----
   if (nrow(readat) > 48){
-    grDevices::pdf(paste0(qadir, "/", "qs_s.pdf"), width = 10, height = 5)
+    grDevices::pdf(paste0(outdir, "/", "qs_s.pdf"), width = 10, height = 5)
     sc <- ggplus::facet_multiple(plot=qs_gg, facets="lane", ncol = 8, nrow = 6)
     grDevices::dev.off()
 
   } else {
-    grDevices::pdf(paste0(qadir, "/", "qs_s.pdf"), width = 10, height = 5)
+    grDevices::pdf(paste0(outdir, "/", "qs_s.pdf"), width = 10, height = 5)
     print(qs_gg)
     grDevices::dev.off()
   }
 
   ## qs all ----
-  grDevices::pdf(paste0(qadir, "/", "qs_al.pdf"), width = 10, height = 5)
+  grDevices::pdf(paste0(outdir, "/", "qs_al.pdf"), width = 10, height = 5)
   print(qs_gg2)
   grDevices::dev.off()
 
   ## freqSeq ----
   if (nrow(readat) > 48){
-    grDevices::pdf(paste0(qadir, "/", "freqSeq.pdf"), width = 10, height = 5)
+    grDevices::pdf(paste0(outdir, "/", "freqSeq.pdf"), width = 10, height = 5)
     sc <- ggplus::facet_multiple(plot=gg_frqseq, facets="lane", ncol = 8, nrow = 6)
     grDevices::dev.off()
 
   } else {
-    grDevices::pdf(paste0(qadir, "/", "freqSeq.pdf"), width = 10, height = 5)
+    grDevices::pdf(paste0(outdir, "/", "freqSeq.pdf"), width = 10, height = 5)
     print(gg_frqseq)
     grDevices::dev.off()
   }

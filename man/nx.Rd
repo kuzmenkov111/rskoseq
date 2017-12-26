@@ -14,12 +14,12 @@ nx(in_f, N, genome)
 \item{genome}{numeric: genome size. The default is NULL. The genome size is calculated from the sum of the widths of the input fasta files.}
 }
 \description{
-Calculation of N50 and L50 from genomic sequence in fasta format
+Calculation of N50 and L50 from genomic sequence in fasta format.
+If the genomic sequence is pseudo chromosomes
 }
 \examples{
 
-# fas <- system.file("extdata/L_casei_bl23.ASM2648v1.dna.toplevel.fa.gz",
-#                    package = "rskodat")
-# nx(in_f = fas, N = c(90,50,10), genome=NULL)
+# fas <- "~/db/genome/TAIR10/Arabidopsis_thaliana.TAIR10.dna.toplevel.fa.gz"
+# nx(in_f = fas, N = 50, genome=NULL)
 
 }

@@ -11,7 +11,7 @@ degall(dat, idx, normalize)
 
 \item{idx}{factor: group of data. E.g. factor(c(1,1,2,2)); factor(c("A","A","B","B"))}
 
-\item{normalize}{integer: If dat is already normalized count data, 'norm' is NULL The default is NULL
+\item{normalize}{integer: If dat is already normalized count data, 'norm' is NULL. The default value is NULL
 If dat is not normalized, select a pipe line number from 1:"DEGES/TbT", 2:"DEGES/edgeR", 3:"DEGES/DESeq".}
 }
 \value{
@@ -22,11 +22,13 @@ split count data with index and Differential expression analysis of all cominati
 }
 \examples{
 ## normalized fpkm
-# nfpkm <- rskodat::nfpkm
+# nfpkm <- rskodat::nfpkm[c(1:3, 10:12, 19:21, 28:30),]
 # index <- factor(paste0(nfpkm$runs, ".", nfpkm$days),
 #                 levels = unique(paste0(nfpkm$runs, ".", nfpkm$days)))
-# res <- degall(dat=nfpkm[-1:-4], idx=index, normalize=NULL)
+# res <- rskoseq::degall(dat=nfpkm[-1:-4], idx=index, normalize=NULL)
 ## get result of estimateDE
 # head(res$data)
+## ggplot
+# ggplus::facet_multiple(res, facets="comp", ncol = 3, nrow = 5)
 
 }

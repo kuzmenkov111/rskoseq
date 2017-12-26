@@ -17,6 +17,6 @@ genome_summary(in_f, N, genome)
 Summary of genomic sequences from fasta file
 }
 \examples{
-# fas <- system.file("extdata/L_casei_bl23.ASM2648v1.dna.toplevel.fa.gz", package = "rskodat")
+# fas <- "~/db/genome/TAIR10/Arabidopsis_thaliana.TAIR10.dna.toplevel.fa.gz"
 # genome_summary(in_f = fas, N=c(90,50,10))
 }

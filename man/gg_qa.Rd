@@ -4,7 +4,7 @@
 \alias{gg_qa}
 \title{Quality assesment with ShortRead package and return ggplot object.}
 \usage{
-gg_qa(fqdir, suffix, prefix, facet_col)
+gg_qa(fqdir, suffix, prefix, facet_col, outdir)
 }
 \arguments{
 \item{fqdir}{A vector of file path of fastq files, or dir path, containing fastq files}
@@ -14,6 +14,8 @@ gg_qa(fqdir, suffix, prefix, facet_col)
 \item{prefix}{A vector of samples name. The default values are names of fastq files containing in fqdir, which substitute 'suffix' character.}
 
 \item{facet_col}{facet of sequence content and quality score per sample plot.}
+
+\item{outdir}{output directory. The default values is same at fqdir.}
 }
 \value{
 The list of ggplot objects returns and write.table for quality assesment with 'qa'.
@@ -28,7 +30,7 @@ This functions returns ggplot objects and create report of qa. The qa report is 
 # prfx <- sub(sffx,"",list.files(p, sffx))
 
 ## execution
-# res_qa <- gg_qa(fqdir=p, suffix=sffx, prefix=prfx, facet_col=2)
+# res_qa <- rskoseq::gg_qa(fqdir=p, suffix=sffx, prefix=prfx, facet_col=2)
 # do.call(gridExtra::grid.arrange, c(res_qa, list(ncol=2)))
 
 }

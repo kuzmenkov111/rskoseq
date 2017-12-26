@@ -11,7 +11,9 @@
 #' # fpkm <- rskodat::fpkm
 #' # gp <- sort(as.integer(factor(sapply(strsplit(names(fpkm), "_"),
 #' #           function(x) paste(head(x,2), collapse = "")))))
-#' # nfpkm <- tmm_norm(dat = fpkm, column = 1:ncol(fpkm), gp = gp, method = 2)
+#' # nfpkm <- rskoseq::tmm_norm(dat = fpkm, column = 1:ncol(fpkm), gp = gp, method = 2)
+#' # fpkm[1:4,1:4]; nfpkm[1:4,1:4]
+#'
 #' @import TCC
 #' @importFrom methods new
 #' @export
