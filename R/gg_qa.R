@@ -67,7 +67,6 @@ gg_qa <- function(fqdir,
     smp <- prefix
   }
 
-
   # data frame: read count ----
   readat <- qadat[["readCounts"]] %>%
     tibble::rownames_to_column("sample") %>%
@@ -79,6 +78,7 @@ gg_qa <- function(fqdir,
     ggplot2::geom_bar(stat="identity") +
     ggplot2::theme_minimal(base_size = 15) +
     ggplot2::labs(x = "") +
+    ggplot2::geom_text(ggplot2::aes(label=read), vjust=1.6, color="white", size=3.5) +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1))
 
 
@@ -130,7 +130,7 @@ gg_qa <- function(fqdir,
 
   ## ggplot: quality socre per sample ----
   qs_gg <- ggplot2::ggplot(qsdat, ggplot2::aes(x=Cycle, y=value, group=Qscore, colour=Qscore))+
-    ggplot2::geom_point() +
+    ggplot2::geom_point(alpha = 0.5) +
     ggplot2::theme_bw(base_size = 15) +
     ggplot2::facet_wrap(~lane, ncol=facet_col)
 

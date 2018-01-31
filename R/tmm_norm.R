@@ -1,5 +1,5 @@
 #' Normarization of RNA-seq count data using tmm
-#' @description This functions returns the normarized count data of multi group
+#' @description This functions returns the normarized count data of multiple groups
 #' @usage tmm_norm(dat, column, gp, method)
 #' @param dat A data frame, matrix. The 'dat' contains columns which names genes and rows contains samples.
 #' @param column Count data columns without id column. The default is 1:ncol(dat)
@@ -32,7 +32,7 @@ tmm_norm <- function(dat, column = 1:ncol(dat), gp, method =2){
 
   # argument check: nrow(dat) and length(gp) ----
   if(ncol(dat) != length(gp)){
-    stop("'dat' contains columns which names genes, and rows contains samples")
+    stop("'dat' contains columns which names samples, and rows contains genes")
   }
   # create TCC object ----
   tcc <- methods::new("TCC", d, gp)

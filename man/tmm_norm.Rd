@@ -19,7 +19,7 @@ tmm_norm(dat, column, gp, method)
 ggobject which containing resulto of 'TCC::getNormalizedData' ,
 }
 \description{
-This functions returns the normarized count data of multi group
+This functions returns the normarized count data of multiple groups
 }
 \examples{
 # # sample data of rna-seq
