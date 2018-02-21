@@ -1,7 +1,7 @@
 #' Normarization of RNA-seq count data using tmm
 #' @description This functions returns the normarized count data of multiple groups
 #' @usage tmm_norm(dat, column, gp, method)
-#' @param dat A data frame, matrix. The 'dat' contains columns which names genes and rows contains samples.
+#' @param dat A data frame, matrix. The 'dat' contains columns which names samples and rows contains genes
 #' @param column Count data columns without id column. The default is 1:ncol(dat)
 #' @param gp replicate group
 #' @param method  a pipe line select from 1:"iDEGES/TbT", 2:"iDEGES/edgeR", 3:"iDEGES/DESeq".
@@ -9,8 +9,7 @@
 #' @examples
 #' # # sample data of rna-seq
 #' # fpkm <- rskodat::fpkm
-#' # gp <- sort(as.integer(factor(sapply(strsplit(names(fpkm), "_"),
-#' #           function(x) paste(head(x,2), collapse = "")))))
+#' # gp <- rep(1:4, each=3)
 #' # nfpkm <- rskoseq::tmm_norm(dat = fpkm, column = 1:ncol(fpkm), gp = gp, method = 2)
 #' # fpkm[1:4,1:4]; nfpkm[1:4,1:4]
 #'
