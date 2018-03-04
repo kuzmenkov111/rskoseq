@@ -57,16 +57,18 @@ maprate <- function(fp, lab){
                       stringsAsFactors = F
   )
 
-  id <- NULL; key <- NULL; value <- NULL;
+  id <- NULL; key <- NULL; value <- NULL; pos <- NULL
   ggmrate <- mrate[c(1,8:10)] %>%
     tidyr::gather(key="key", value="value", -1) %>%
     dplyr::mutate(key = factor(key, levels=c("unmapped", "multiple", "unique"))) %>%
+    dplyr::mutate(pos = rev(cumsum(rev(value)) - rev(value) + rev(value)/2)) %>%
     ggplot2::ggplot(ggplot2::aes (x = id, y = value, fill = key)) +
     ggplot2::theme_minimal() +
     ggplot2::geom_bar(stat = "identity") +
-    #ggplot2::geom_text(aes(x = , y = rep(100,4), label=mrate$nreads), vjust=-0.3, size=3.5) +
+    #ggplot2::geom_text(ggplot2::aes(label=value), col = "white",size = 3, hjust = 0.5, vjust = 3, position = "stack") +
+    ggplot2::geom_text(ggplot2::aes(label=value, y=pos), col = "white") +
     ggplot2::theme(axis.text.x =ggplot2::element_text(angle=90, hjust=1)) +
-    ggplot2::labs(x="", y="mapping rate", fill="" )
+    ggplot2::labs(x="", y="mapping rate(%)", fill="" )
 
   return(list(mrate, ggmrate))
 }

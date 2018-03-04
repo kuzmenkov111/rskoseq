@@ -7,7 +7,7 @@
 #' @param genome numeric: genome size. The default is NULL. The genome size is calculated from the sum of the widths of the input fasta files.
 #' @examples
 #'
-#' # fas <- "~/db/genome/TAIR10/Arabidopsis_thaliana.TAIR10.dna.toplevel.fa.gz"
+#' # fas <- "~/db/genome/CHOK1GS_HDv1/CHOK1GS_HDv1.dna.toplevel.fa.gz"
 #' # nx(in_f = fas, N = 50, genome=NULL)
 #'
 #' @importFrom Biostrings readDNAStringSet width

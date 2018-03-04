@@ -3,9 +3,10 @@
 #' @usage genome_summary(in_f, N, genome)
 #' @param in_f The input file path with fasta format, or DNAStringSet object from Biostrings package.
 #' @param N numeric vector: If calcuration for N90(L90), N50(L50), and N10(L10), N = c(90, 50, 10)
+#'     The N50 length is defined as the shortest sequence length at 50 percent of the genome. L50 is the number of contigs whose summed length is N50.
 #' @param genome numeric: genome size. The default is NULL. The genome size is calculated from the sum of the widths of the input fasta files.
 #' @examples
-#' # fas <- "~/db/genome/TAIR10/Arabidopsis_thaliana.TAIR10.dna.toplevel.fa.gz"
+#' # fas <- "~/db/genome/CHOK1GS_HDv1/CHOK1GS_HDv1.dna.toplevel.fa.gz"
 #' # genome_summary(in_f = fas, N=c(90,50,10))
 #' @importFrom Biostrings readDNAStringSet width alphabetFrequency
 #'
@@ -29,11 +30,11 @@ genome_summary <- function(in_f, N, genome=NULL){
   scaffold <-  length(seq)
 
   # total bases ---
-  bp <- sum(as.numeric(width(seq)))
+  bp <- sum(as.numeric(Biostrings::width(seq)))
 
 
   if (length(N)==1){
-    res <- nx(in_f = seq, N = N, genome)
+    res <- rskoseq::nx(in_f = seq, N = N, genome)
     NLX <- setNames(paste(res, collapse = ";"),
                     paste(paste0("N",N), paste0("L", N), sep = ";"))
 

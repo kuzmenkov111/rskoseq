@@ -7,7 +7,7 @@
 tmm_norm(dat, column, gp, method)
 }
 \arguments{
-\item{dat}{A data frame, matrix. The 'dat' contains columns which names genes and rows contains samples.}
+\item{dat}{A data frame, matrix. The 'dat' contains columns which names samples and rows contains genes}
 
 \item{column}{Count data columns without id column. The default is 1:ncol(dat)}
 
@@ -24,8 +24,7 @@ This functions returns the normarized count data of multiple groups
 \examples{
 # # sample data of rna-seq
 # fpkm <- rskodat::fpkm
-# gp <- sort(as.integer(factor(sapply(strsplit(names(fpkm), "_"),
-#           function(x) paste(head(x,2), collapse = "")))))
+# gp <- rep(1:4, each=3)
 # nfpkm <- rskoseq::tmm_norm(dat = fpkm, column = 1:ncol(fpkm), gp = gp, method = 2)
 # fpkm[1:4,1:4]; nfpkm[1:4,1:4]
 
