@@ -61,6 +61,7 @@ maprate <- function(fp, lab){
   ggmrate <- mrate[c(1,8:10)] %>%
     tidyr::gather(key="key", value="value", -1) %>%
     dplyr::mutate(key = factor(key, levels=c("unmapped", "multiple", "unique"))) %>%
+    dplyr::group_by(id) %>%
     dplyr::mutate(pos = rev(cumsum(rev(value)) - rev(value) + rev(value)/2)) %>%
     ggplot2::ggplot(ggplot2::aes (x = id, y = value, fill = key)) +
     ggplot2::theme_minimal() +

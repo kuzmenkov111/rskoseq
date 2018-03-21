@@ -78,7 +78,7 @@ gg_qa <- function(fqdir,
     ggplot2::geom_bar(stat="identity") +
     ggplot2::theme_minimal(base_size = 15) +
     ggplot2::labs(x = "") +
-    ggplot2::geom_text(ggplot2::aes(label=read), vjust=1.6, color="white", size=3.5) +
+    ggplot2::geom_text(ggplot2::aes(label=read), vjust=1.5, color="white", angle=90, size=3.5) +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1))
 
 
