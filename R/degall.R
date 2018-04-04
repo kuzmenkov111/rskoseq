@@ -10,19 +10,21 @@
 #' # nfpkm <- rskodat::nfpkm[c(1:3, 10:12, 19:21, 28:30),]
 #' # index <- factor(rep(1:4, each=3))
 #' # res <- rskoseq::degall(dat=nfpkm[-1:-4], idx=index, normalize=NULL)
+#'
 #' ## get result of estimateDE
 #' # head(res$data)
-#' ## ggplot
+#'
+#' ## MA-plot
 #' # ggplus::facet_multiple(res, facets="comp", ncol = 3, nrow = 5)
 #'
-#' #
-#' comp1 <- nfpkm[nfpkm$days =="d3" & nfpkm$runs %in% c("S1", "S2"),]
-#' comp2 <- nfpkm[nfpkm$days =="d6" & nfpkm$runs %in% c("S1", "S2"),]
-#' comp3 <- nfpkm[nfpkm$days =="d12" & nfpkm$runs %in% c("S1", "S2"),]
-#' index <- factor(rep(1:2, each=3))
-#' res1 <- rskoseq::degall(dat=comp1[-1:-4], idx=index, normalize=NULL)
-#' res2 <- rskoseq::degall(dat=comp2[-1:-4], idx=index, normalize=NULL)
-#' res3 <- rskoseq::degall(dat=comp3[-1:-4], idx=index, normalize=NULL)
+#' ## single comparison
+#' # comp1 <- nfpkm[nfpkm$days =="d3" & nfpkm$runs %in% c("S1", "S2"),]
+#' # comp2 <- nfpkm[nfpkm$days =="d6" & nfpkm$runs %in% c("S1", "S2"),]
+#' # comp3 <- nfpkm[nfpkm$days =="d12" & nfpkm$runs %in% c("S1", "S2"),]
+#' # index <- factor(rep(1:2, each=3))
+#' # res1 <- rskoseq::degall(dat=comp1[-1:-4], idx=index, normalize=NULL)
+#' # res2 <- rskoseq::degall(dat=comp2[-1:-4], idx=index, normalize=NULL)
+#' # res3 <- rskoseq::degall(dat=comp3[-1:-4], idx=index, normalize=NULL)
 #'
 #' @import TCC
 #' @importFrom dplyr %>% select mutate
