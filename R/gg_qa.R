@@ -1,11 +1,12 @@
 #' Quality assesment with ShortRead package and return ggplot object.
 #' @description This functions returns ggplot objects and create report of qa. The qa report is created at above of the fastq directory.
-#' @usage gg_qa(fqdir, suffix, prefix, facet_col, outdir)
+#' @usage gg_qa(fqdir, suffix, prefix, facet_col, outdir, ow)
 #' @param fqdir A vector of file path of fastq files, or dir path, containing fastq files
 #' @param suffix A pattern of fastq file suffix. The default is ".fastq.gz"
 #' @param prefix A vector of samples name. The default values are names of fastq files containing in fqdir, which substitute 'suffix' character.
 #' @param facet_col facet of sequence content and quality score per sample plot.
 #' @param outdir output directory. The default values is same at fqdir.
+#' @param ow logical. It must be TRUE if overwritten. The default value is FALSE.
 #' @return  The list of ggplot objects returns and write.table for quality assesment with 'qa'.
 #' @examples
 #' ## arguments
@@ -31,11 +32,13 @@ gg_qa <- function(fqdir,
                   suffix = ".fastq.gz",
                   prefix = sub(suffix, "", list.files(fqdir, suffix)),
                   facet_col,
-                  outdir = paste0(dirname(fqdir),"/qa")){
-  # fqdir <- "~/pub/sampledata/rnaseq/project1/fastq";
+                  outdir = paste0(dirname(fqdir),"/qa"),
+                  ow = FALSE){
+  # fqdir <- p
   # suffix <- ".fastq.gz";
   # prefix =sub(suffix, "", list.files(fqdir, suffix))
   # facet_col=2
+  # outdir = paste0(dirname(fqdir),"/qa")
 
   # file exists or not(full path) ----
   if (!all(file.exists(fqdir))){
@@ -46,8 +49,9 @@ gg_qa <- function(fqdir,
   ## outputdir ----
   if (!file.exists(outdir)){
     dir.create(outdir)
-  } else if (file.exists(outdir) & !identical(list.files(outdir), character(0))){
-    stop(paste("There is some file at ", outdir))
+  } else if (file.exists(outdir) & !identical(list.files(outdir), character(0)) & ow == F){
+    stop(paste("There is some file at ", outdir, "\n",
+               " 'ow' must be TRUE if overwritten. "))
   }
 
   ## execute qa and reporting ----
@@ -56,7 +60,7 @@ gg_qa <- function(fqdir,
 
 
   # initialize of tbl object columns ----
-  read <- NULL; Base <- NULL; Count <- NULL; Cycle <- NULL; Qscore <- NULL;
+  read <- NULL; pos <- NULL; Base <- NULL; Count <- NULL; Cycle <- NULL; Qscore <- NULL;
   `Score Sequence Content(%)` <- NULL;  lane <- NULL; value <- NULL;
   Score <- NULL; `Sequence Content(%)` <- NULL;
 
@@ -70,7 +74,8 @@ gg_qa <- function(fqdir,
   # data frame: read count ----
   readat <- qadat[["readCounts"]] %>%
     tibble::rownames_to_column("sample") %>%
-    dplyr::mutate(sample = sub(suffix,"", sample))
+    dplyr::mutate(sample = sub(suffix,"", sample)) %>%
+    dplyr::mutate(pos = min(read)/2)
 
   ## ggplot: read count ----
   read_gg <-
@@ -78,7 +83,7 @@ gg_qa <- function(fqdir,
     ggplot2::geom_bar(stat="identity") +
     ggplot2::theme_minimal(base_size = 15) +
     ggplot2::labs(x = "") +
-    ggplot2::geom_text(ggplot2::aes(label=read), color="white", angle=90, size=3.5) +
+    ggplot2::geom_text(ggplot2::aes(y = pos, label=read), color="white", angle=90, size=3.5) +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1))
 
 

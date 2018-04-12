@@ -4,7 +4,7 @@
 \alias{gg_qa}
 \title{Quality assesment with ShortRead package and return ggplot object.}
 \usage{
-gg_qa(fqdir, suffix, prefix, facet_col, outdir)
+gg_qa(fqdir, suffix, prefix, facet_col, outdir, ow)
 }
 \arguments{
 \item{fqdir}{A vector of file path of fastq files, or dir path, containing fastq files}
@@ -16,6 +16,8 @@ gg_qa(fqdir, suffix, prefix, facet_col, outdir)
 \item{facet_col}{facet of sequence content and quality score per sample plot.}
 
 \item{outdir}{output directory. The default values is same at fqdir.}
+
+\item{ow}{logical. It must be TRUE if overwritten. The default value is FALSE.}
 }
 \value{
 The list of ggplot objects returns and write.table for quality assesment with 'qa'.
