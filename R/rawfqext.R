@@ -4,7 +4,7 @@
 #' @param rawfq_dir fastq containing directory
 #' @param prefix sample name
 #' @examples
-#' # rawfq_dir <- "~/pub/sampledata/NEXTSEQ_OUT"
+#' # rawfq_dir <- "~/pub/sampledata/fastq/NEXTSEQ_OUT"
 #' # prefix <- c("S1","S2")
 #' # rawfqext(rawfq_dir, prefix)
 #' @export
@@ -65,7 +65,7 @@ rawfqext <- function(rawfq_dir, prefix){
                         rawfq_dir, "/",
                         prefix[i], "_R2.fastq.gz")
         system(com2g)
-        cat(com2g)
+        cat(paste0(com2g, "\n"))
       }
     }
   }

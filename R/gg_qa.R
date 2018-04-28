@@ -33,28 +33,30 @@ gg_qa <- function(fqdir,
                   prefix = sub(suffix, "", list.files(fqdir, suffix)),
                   facet_col,
                   outdir = paste0(dirname(fqdir),"/qa"),
-                  ow = FALSE){
+                  ow = FALSE) {
   # fqdir <- p
   # suffix <- ".fastq.gz";
   # prefix =sub(suffix, "", list.files(fqdir, suffix))
   # facet_col=2
   # outdir = paste0(dirname(fqdir),"/qa")
 
-  # file exists or not(full path) ----
+  # argument check: file exists or not(full path) ----
   if (!all(file.exists(fqdir))){
     stop("I cannot find these all files.")
   }
 
-  # quarity assesment
-  ## outputdir ----
-  if (!file.exists(outdir)){
+  # argument check: output directory exists or not ----
+  if (is.null(outdir)){
+    qadat <- ShortRead::qa(dirPath = fqdir)
+
+  } else if (!is.null(outdir) & !file.exists(outdir)){
     dir.create(outdir)
   } else if (file.exists(outdir) & !identical(list.files(outdir), character(0)) & ow == F){
     stop(paste("There is some file at ", outdir, "\n",
                " 'ow' must be TRUE if overwritten. "))
   }
 
-  ## execute qa and reporting ----
+  # execute qa and reporting ----
   qadat <- ShortRead::qa(dirPath = fqdir)
   ShortRead::report(qadat, dest = paste0(outdir, "/report"))
 
