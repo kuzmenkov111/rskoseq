@@ -7,9 +7,9 @@
 #' @param algnr character: select an alignment program from "hisat2"(default), "rsem", "others"
 #' @examples
 #' # # create new project
-#' # prj <- "~/pub/dat/sampledata/rnaseq/project1"
-#' # project_rnsq(prjd = prj)
-#' # project_rnsq(prjd = prj, alnd="rsem1", algnr="rsem")
+#' # prj <- "~/pub/sampledata/rnaseq/project1"
+#' # project_rnsq(prjd = prj, alnd="test.h2", algnr="hisat2")
+#' # project_rnsq(prjd = prj, alnd="test.rsm", algnr="rsem")
 #' # system(paste("tree", prj))
 #' # # now there is a project directory, create another alignment directory.
 #' # project_rnsq(prjd = prj, alnd = "alignment2")

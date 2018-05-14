@@ -1,6 +1,6 @@
 #' Calcuration of N50 and L50 from genome sequence.
 #' @description Calculation of N50 and L50 from genomic sequence in fasta format.
-#' If the genomic sequence is pseudo chromosomes
+#' If the genomic sequence is pseudo chromosomes, L50 is no needed.
 #' @usage nx(in_f, N, genome)
 #' @param in_f The input file path with fasta format, or DNAStringSet object from Biostrings package.
 #' @param N numeric vector: If calcuration for N90(L90), N50(L50), and N10(L10), N = c(90, 50, 10)
@@ -8,7 +8,7 @@
 #' @examples
 #'
 #' # fas <- "~/db/genome/CHOK1GS_HDv1/CHOK1GS_HDv1.dna.toplevel.fa.gz"
-#' # nx(in_f = fas, N = 50, genome=NULL)
+#' # rskoseq::nx(in_f = fas, N = 50)
 #'
 #' @importFrom Biostrings readDNAStringSet width
 #' @export

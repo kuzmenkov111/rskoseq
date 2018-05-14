@@ -15,11 +15,11 @@ nx(in_f, N, genome)
 }
 \description{
 Calculation of N50 and L50 from genomic sequence in fasta format.
-If the genomic sequence is pseudo chromosomes
+If the genomic sequence is pseudo chromosomes, L50 is no needed.
 }
 \examples{
 
 # fas <- "~/db/genome/CHOK1GS_HDv1/CHOK1GS_HDv1.dna.toplevel.fa.gz"
-# nx(in_f = fas, N = 50, genome=NULL)
+# rskoseq::nx(in_f = fas, N = 50)
 
 }

@@ -15,7 +15,7 @@ rawfqext(rawfq_dir, prefix)
 merge NEXTSEQ output fastq, which created by BaseSpace
 }
 \examples{
-# rawfq_dir <- "~/pub/sampledata/NEXTSEQ_OUT"
+# rawfq_dir <- "~/pub/sampledata/fastq/NEXTSEQ_OUT"
 # prefix <- c("S1","S2")
 # rawfqext(rawfq_dir, prefix)
 }

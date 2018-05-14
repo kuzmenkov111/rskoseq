@@ -4,10 +4,15 @@
 \alias{rep_rsem}
 \title{Continuous execution of sequence alignment using RSEM}
 \usage{
-rep_rsem (path_aln, idx_name, suffix_fq)
+rep_rsem (alndir, fqdir, paired, idx_name, suffix_fq)
 }
 \arguments{
-\item{path_aln}{alignment directory path, created by rskoseq::project_rnsq.}
+\item{alndir}{alignment directory path, created by rskoseq::project_rnsq.}
+
+\item{fqdir}{character: the fully path of fastq files. The default is 'paste0(dirname(alndir), "/fastq")'.
+If this directory containing still analyzed fastq and additional fastq files,}
+
+\item{paired}{logical: paired or single read. If paired end, the names of fastq file must be "_R1" and "_R2".}
 
 \item{idx_name}{rsem index file path}
 
@@ -20,7 +25,6 @@ Description
 ##
 ### rep rsem
 # idx <- "~/db/index/rsem_idx/cge25207.add"
-# alnd <- "~/pub/sampledata/rnaseq/project1/rsem1/"
-# prj <- "~/pub/sampledata/rnaseq/project1"
-# rep_rsem(path_prj = prj, alnd = alnd, idx_name=idx)
+# alnd <- "~/pub/sampledata/rnaseq/project1/test.rsm"
+# rskoseq::rep_rsem(alndir=alnd, idx_name=idx)
 }

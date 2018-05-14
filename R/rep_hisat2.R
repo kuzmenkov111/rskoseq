@@ -42,8 +42,8 @@
 # if paired is TRUE, suffix of read must to be _R1.fastq.gz,  _R2.fastq.gz
 
 rep_hisat2 <- function(alndir, idx, project = TRUE,
-                       fqdir=paste0(dirname(alndir), "/fastq"),
-                       paired=FALSE, suffix_fq=".fastq.gz", ...){
+                       fqdir = paste0(dirname(alndir), "/fastq"),
+                       paired = FALSE, suffix_fq=".fastq.gz", ...){
   # system command check: hisat2 and samtools program PATH ----
   hs2c <- suppressWarnings(system("which hisat2", intern = T))
   samc <- suppressWarnings(system("which samtools", intern = T))
