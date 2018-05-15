@@ -4,12 +4,14 @@
 \alias{rawfqext}
 \title{rawfqext}
 \usage{
-rawfqext(rawfq_dir, prefix)
+rawfqext(rawfq_dir, paired, prefix)
 }
 \arguments{
 \item{rawfq_dir}{fastq containing directory}
 
-\item{prefix}{sample name}
+\item{paired}{logical, if TRUE is paired end read.}
+
+\item{prefix}{Characters of sample name, The default value is NULL, collect from directories name.}
 }
 \description{
 merge NEXTSEQ output fastq, which created by BaseSpace
