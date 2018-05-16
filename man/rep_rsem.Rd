@@ -24,7 +24,12 @@ Description
 \examples{
 ##
 ### rep rsem
+# single ----
 # idx <- "~/db/index/rsem_idx/cge25207.add"
 # alnd <- "~/pub/sampledata/rnaseq/project1/test.rsm"
 # rskoseq::rep_rsem(alndir=alnd, idx_name=idx)
+# paired ----
+# alnd <- "~/pub/sampledata/rnaseq/project1/test2.rsm"
+# fqd <- "~/pub/sampledata/rnaseq/project1/paired_fastq"
+# rskoseq::rep_rsem(alndir = alnd, fqdir = fqd, paired =T)
 }

@@ -18,7 +18,7 @@ data frame of mapping rate and ggplot object
 Parse hisat2 log file and extract mapping rate of all samples.
 }
 \examples{
-log <- system.file("extdata", "hisat2_log.txt", package = "rskoseq")
+h2.paired.log <- system.file("extdata", "hisat2_log.txt", package = "rskoseq")
 label <- c("A","B","C","D")
-res <- maprate(fp = log, lab = label)
+res <- maprate(fp = h2.paired.log, lab = label)
 }

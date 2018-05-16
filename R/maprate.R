@@ -5,9 +5,9 @@
 #' @param lab file name as sample name
 #' @return data frame of mapping rate and ggplot object
 #' @examples
-#' log <- system.file("extdata", "hisat2_log.txt", package = "rskoseq")
+#' h2.paired.log <- system.file("extdata", "hisat2_log.txt", package = "rskoseq")
 #' label <- c("A","B","C","D")
-#' res <- maprate(fp = log, lab = label)
+#' res <- maprate(fp = h2.paired.log, lab = label)
 #' @export
 
 maprate <- function(fp, lab){
@@ -24,7 +24,7 @@ maprate <- function(fp, lab){
     stop("number of samples and label's length are different")
   }
 
-  # read log file
+  # read log file ----
   lines <- gsub("^[ ]+|[ ]+$", "",  lines)
   rn <- sub(" reads; of these:", "", lines[grep("reads; of these", lines)])
 
@@ -32,33 +32,64 @@ maprate <- function(fp, lab){
   prn <- sapply(strsplit(prn_lines, " "), "[", 1)
   prn_rate <- sub(".*\\((.*)\\%\\).*", "\\1", prn_lines)
 
-  # unmap
-  unm_lines <- grep(") aligned concordantly 0 times", lines, value = T)
-  unm <- sapply(strsplit(unm_lines, " "), "[", 1)
-  unm_rate <- sub("\\((.*)\\%\\)", "\\1", sapply(strsplit(unm_lines, " "), "[", 2))
 
-  # unique
-  uqm_lines <- grep(" aligned concordantly exactly 1 time", lines, value = T)
-  uqm <- sapply(strsplit(uqm_lines, " "), "[", 1)
-  uqm_rate <- sub("\\((.*)\\%\\)", "\\1", sapply(strsplit(uqm_lines, " "), "[", 2))
+  if (!identical(prn_lines, character(0))){
+    # unmap ----
+    unm_lines <- grep(") aligned concordantly 0 times", lines, value = T)
+    unm <- sapply(strsplit(unm_lines, " "), "[", 1)
+    unm_rate <- sub("\\((.*)\\%\\)", "\\1", sapply(strsplit(unm_lines, " "), "[", 2))
 
-  # multiple
-  mm_lines <- grep(" aligned concordantly >1 times", lines, value = T)
-  mm <- sapply(strsplit(mm_lines, " "), "[", 1)
-  mm_rate <- sub("\\((.*)\\%\\)", "\\1", sapply(strsplit(mm_lines, " "), "[", 2))
+    # unique ----
+    uqm_lines <- grep(" aligned concordantly exactly 1 time", lines, value = T)
+    uqm <- sapply(strsplit(uqm_lines, " "), "[", 1)
+    uqm_rate <- sub("\\((.*)\\%\\)", "\\1", sapply(strsplit(uqm_lines, " "), "[", 2))
 
-  mrate <- data.frame(id=lab,
-                      nreads=rn, npreads = prn, nunmreads = unm,
-                      nuqreads = uqm, nmpreads = mm,
-                      rpreads = prn_rate,
-                      unmapped = as.numeric(unm_rate),
-                      multiple = as.numeric(mm_rate),
-                      unique = as.numeric(uqm_rate),
-                      stringsAsFactors = F
-  )
+    # multiple ----
+    mm_lines <- grep(" aligned concordantly >1 times", lines, value = T)
+    mm <- sapply(strsplit(mm_lines, " "), "[", 1)
+    mm_rate <- sub("\\((.*)\\%\\)", "\\1", sapply(strsplit(mm_lines, " "), "[", 2))
 
-  id <- NULL; key <- NULL; value <- NULL; pos <- NULL
-  ggmrate <- mrate[c(1,8:10)] %>%
+    # data.frame of paired-reads mapping rate ----
+    mrate <- data.frame(id=lab,
+                        nreads=rn, npreads = prn, nunmreads = unm,
+                        nuqreads = uqm, nmpreads = mm,
+                        rpreads = prn_rate,
+                        unmapped = as.numeric(unm_rate),
+                        multiple = as.numeric(mm_rate),
+                        unique = as.numeric(uqm_rate),
+                        stringsAsFactors = F
+    )
+  } else {
+    # unmap ----
+    unm_lines <- grep(") aligned 0 times", lines, value = T)
+    unm <- sapply(strsplit(unm_lines, " "), "[", 1)
+    unm_rate <- sub("\\((.*)\\%\\)", "\\1", sapply(strsplit(unm_lines, " "), "[", 2))
+
+    # unique ----
+    uqm_lines <- grep(") aligned exactly 1 time", lines, value = T)
+    uqm <- sapply(strsplit(uqm_lines, " "), "[", 1)
+    uqm_rate <- sub("\\((.*)\\%\\)", "\\1", sapply(strsplit(uqm_lines, " "), "[", 2))
+
+    # multiple ----
+    mm_lines <- grep(") aligned >1 times", lines, value = T)
+    mm <- sapply(strsplit(mm_lines, " "), "[", 1)
+    mm_rate <- sub("\\((.*)\\%\\)", "\\1", sapply(strsplit(mm_lines, " "), "[", 2))
+
+    # data.frame of single-reads mapping rate ----
+    mrate <- data.frame(id=lab,
+                        nreads=rn, nunmreads = unm,
+                        nuqreads = uqm, nmpreads = mm,
+                        unmapped = as.numeric(unm_rate),
+                        multiple = as.numeric(mm_rate),
+                        unique = as.numeric(uqm_rate),
+                        stringsAsFactors = F
+    )
+  }
+
+
+  id <- NULL; unmapped <- NULL; multiple <- NULL;  key <- NULL; value <- NULL; pos <- NULL
+  ggmrate <- mrate %>%
+    dplyr::select(id, unmapped, multiple, unique) %>%
     tidyr::gather(key="key", value="value", -1) %>%
     dplyr::mutate(key = factor(key, levels=c("unmapped", "multiple", "unique"))) %>%
     dplyr::group_by(id) %>%

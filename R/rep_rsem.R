@@ -9,9 +9,14 @@
 #' @param suffix_fq suffix of fastq files. The default value is ".fastq.gz"
 #' @examples ##
 #' ### rep rsem
+#' # single ----
 #' # idx <- "~/db/index/rsem_idx/cge25207.add"
 #' # alnd <- "~/pub/sampledata/rnaseq/project1/test.rsm"
 #' # rskoseq::rep_rsem(alndir=alnd, idx_name=idx)
+#' # paired ----
+#' # alnd <- "~/pub/sampledata/rnaseq/project1/test2.rsm"
+#' # fqd <- "~/pub/sampledata/rnaseq/project1/paired_fastq"
+#' # rskoseq::rep_rsem(alndir = alnd, fqdir = fqd, paired =T)
 #' @importFrom dplyr select arrange
 #' @importFrom parallel detectCores
 #' @importFrom readr read_delim
@@ -22,12 +27,6 @@ rep_rsem <- function(alndir,
                      paired = FALSE,
                      idx_name,
                      suffix_fq=".fastq.gz"){
-  # test ----
-  # alndir = "~/pub/sampledata/rnaseq/project1/test.rsm";
-  # fqdir = paste0(dirname(alndir), "/fastq")
-  # paired = FALSE;
-  # idx_name = "~/db/index/rsem_idx/cge25207.add"
-  # suffix_fq=".fastq.gz"
 
   # argument check: collect PATH of fastq files in fastq directory ########################
   ## fastq files or directory exist or not ----
@@ -38,16 +37,18 @@ rep_rsem <- function(alndir,
 
   ## collect fastq files pqth ----
   if (paired ==T){
-    r1fqs <- grep(paste0("_R1",suffix_fq), path_fq, value = T)
-    r2fqs <- grep(paste0("_R2",suffix_fq), path_fq, value = T)
+    r1fqs <- grep("R1", path_fq, value = T)
+    r2fqs <- grep("R2", path_fq, value = T)
+
   } else {
     r1fqs <- path_fq
   }
 
   ## prefix of fastq files ----
-  if (all(grepl(paste0("_R1", suffix_fq), r1fqs))){
-    prefix <- sub(paste0("_R1", suffix_fq), "",
-                  sapply(strsplit(r1fqs, "\\/"), function(x)tail(x, 1)))
+  if (all(grepl("R1", r1fqs))){
+    prefix <- sub("_R1", "",
+                  sub(suffix_fq, "",
+                      sapply(strsplit(r1fqs, "\\/"), function(x)tail(x, 1))))
   } else {
     prefix <- sub(suffix_fq, "", sapply(strsplit(r1fqs, "/"), function(x)tail(x, 1)))
   }
@@ -207,13 +208,25 @@ rep_rsem <- function(alndir,
   # mapping rate ----
   mread <- lapply(seq_along(path_maplog), function(i){
     lines <- readLines(path_maplog[i]) %>% gsub("^[ ]+|[ ]+$", "",  .)
-    as.numeric(c(
-      sapply(strsplit(grep("aligned 0 times", lines, value = T), " "), "[", 1),
-      sapply(strsplit(grep("aligned exactly 1 time", lines, value = T), " "), "[", 1),
-      sapply(strsplit(grep("aligned >1 times", lines, value = T), " "), "[", 1)
-    ))
+    if (paired == F){
+      as.numeric(c(
+        sapply(strsplit(grep("aligned 0 times", lines, value = T), " "), "[", 1),
+        sapply(strsplit(grep("aligned exactly 1 time", lines, value = T), " "), "[", 1),
+        sapply(strsplit(grep("aligned >1 times", lines, value = T), " "), "[", 1)
+      ))
+
+    } else if (paired == T){
+      as.numeric(c(
+        sapply(strsplit(grep("aligned concordantly 0 times", lines, value = T), " "), "[", 1),
+        sapply(strsplit(grep("aligned concordantly exactly 1 time", lines, value = T), " "), "[", 1),
+        sapply(strsplit(grep("aligned concordantly >1 times", lines, value = T), " "), "[", 1)
+      ))
+
+    }
+
   })
   mread <- setNames(mread, prefix)
+
 
   m <- NULL; rate <- NULL; read <- NULL; smp <- NULL
   mdat <- data.frame(m =factor(c("unmapped", "mapped", "multiple"),
