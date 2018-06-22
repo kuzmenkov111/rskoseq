@@ -27,17 +27,24 @@ The NGS read alignment using hisat2 for multiple samples.
     The input and output directory must be created by 'rskoseq::project_rnsq'.
 }
 \examples{
-## project TRUE (all result created at directories predetermined by 'project_rnsq')
+## project TRUE (all result created at directories predetermined by 'project_rnsq') ----
 # alndir <- "~/pub/sampledata/rnaseq/project1/test.h2"
-# idx <- "~/db/index/hisat2_idx/CriGri_1.0.ens"
-# rep_hisat2(alndir = alndir, idx = idx, paired=F)
+# idx <- "~/db/index/hisat2_idx/CriGri_1.0.ens.add"
+# unlink(alndir, recursive = T)
+# rskoseq::project_rnsq("~/pub/sampledata/rnaseq/project1", "test.h2", "hisat2")
+# rskoseq::rep_hisat2(alndir = alndir, idx = idx, paired=F)
+
 ## paired ----
 # alndir <- "~/pub/sampledata/rnaseq/project1/test2.h2"
 # fqd <- "~/pub/sampledata/rnaseq/project1/paired_fastq"
+# unlink(alndir, recursive = T)
+# rskoseq::project_rnsq("~/pub/sampledata/rnaseq/project1", "test2.h2", "hisat2")
 # rep_hisat2(alndir = alndir, idx = idx, fqdir = fqd, suffix_fq = "_sub.fastq.gz", paired=T)
 #
 ## project FALSE (all result create under the alignment directory)
-# alndir <- "~/pub/sampledata/rnaseq/project1/
-# rep_hisat2(prjd = prj, idx = idx, paired=FALSE, alnd = "alignment2")
+# alndir <- "~/pub/sampledata/rnaseq/project1"
+# fqd <- "~/pub/sampledata/rnaseq/project1/fastq"
+# rep_hisat2(alndir = "~/pub/sampledata/rnaseq/project1", project = F,
+#            idx = idx, fqdir = fqd, paired=FALSE, )
 
 }

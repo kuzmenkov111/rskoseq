@@ -40,7 +40,7 @@ project_rnsq <- function(prjd, alnd="alignment1", algnr="hisat2"){
   prjn <- sapply(strsplit(prjd, "/"), function(x)tail(x,1))
 
   # still exist project directory, and create another alignment ----
-  if (file.exists(prjd) & !any(grepl(alnd, list.files(prjd)))){
+  if (file.exists(prjd) & is.na(match(alnd, list.files(prjd)))){
     if (algnr =="hisat2"){
       ## res_hisat2 dir ----
       h2dir <- paste0(prjd, "/", alnd, "/res_hisat2/failalign")
@@ -81,7 +81,7 @@ project_rnsq <- function(prjd, alnd="alignment1", algnr="hisat2"){
 
     }
   # still exist alignment directory, different alignment directory create
-  } else if (file.exists(prjd) & any(grepl(alnd, list.files(prjd)))) {
+  } else if (file.exists(prjd) & !is.na(match(alnd, list.files(prjd)))) {
     stop(paste0("The directory ", prjd, " still exists, and give different name of alignment directory from '", alnd, "'."))
 
 

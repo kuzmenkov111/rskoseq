@@ -12,11 +12,17 @@
 #' # single ----
 #' # idx <- "~/db/index/rsem_idx/cge25207.add"
 #' # alnd <- "~/pub/sampledata/rnaseq/project1/test.rsm"
+#' # unlink(alnd)
+#' # rskoseq::project_rnsq("~/pub/sampledata/rnaseq/project1", "test.rsm", "rsem")
 #' # rskoseq::rep_rsem(alndir=alnd, idx_name=idx)
+#'
 #' # paired ----
 #' # alnd <- "~/pub/sampledata/rnaseq/project1/test2.rsm"
 #' # fqd <- "~/pub/sampledata/rnaseq/project1/paired_fastq"
-#' # rskoseq::rep_rsem(alndir = alnd, fqdir = fqd, paired =T)
+#' # unlink(alnd)
+#' # rskoseq::project_rnsq("~/pub/sampledata/rnaseq/project1", "test2.rsm", "rsem")
+#' # rskoseq::rep_rsem(alndir = alnd, fqdir = fqd, paired =T, idx_name = idx)
+#'
 #' @importFrom dplyr select arrange
 #' @importFrom parallel detectCores
 #' @importFrom readr read_delim
@@ -35,7 +41,7 @@ rep_rsem <- function(alndir,
     stop(paste("There is not fastq files in", fqdir, ", or the suffix of fastq is different from", suffix_fq, "."))
   }
 
-  ## collect fastq files pqth ----
+  ## Collect path of fastq file ----
   if (paired ==T){
     r1fqs <- grep("R1", path_fq, value = T)
     r2fqs <- grep("R2", path_fq, value = T)

@@ -27,9 +27,15 @@ Description
 # single ----
 # idx <- "~/db/index/rsem_idx/cge25207.add"
 # alnd <- "~/pub/sampledata/rnaseq/project1/test.rsm"
+# unlink(alnd)
+# rskoseq::project_rnsq("~/pub/sampledata/rnaseq/project1", "test.rsm", "rsem")
 # rskoseq::rep_rsem(alndir=alnd, idx_name=idx)
+
 # paired ----
 # alnd <- "~/pub/sampledata/rnaseq/project1/test2.rsm"
 # fqd <- "~/pub/sampledata/rnaseq/project1/paired_fastq"
-# rskoseq::rep_rsem(alndir = alnd, fqdir = fqd, paired =T)
+# unlink(alnd)
+# rskoseq::project_rnsq("~/pub/sampledata/rnaseq/project1", "test2.rsm", "rsem")
+# rskoseq::rep_rsem(alndir = alnd, fqdir = fqd, paired =T, idx_name = idx)
+
 }

@@ -24,8 +24,8 @@ Consecutive processiong of stringtie for multiple samples, then FPKM and cov dat
    Execution following from 'rskoseq::project_rnsq', 'rskoseq::rep_hisat2'.
 }
 \examples{
-#
+##
 # bamdir <- "~/pub/sampledata/rnaseq/project1/test.h2/res_hisat2"
-# guide <- "~/db/index/hisat2_idx/Cricetulus_griseus_crigri.CriGri_1.0.90.gff3"
-# rep_stringtie(bamdir=bamdir, guide_gff=guide, ... = "-p 8")
+# guide <- "~/db/index/hisat2_idx/CriGri_1.0.ens.add.gff"
+# rep_stringtie(bamdir=bamdir, guide_gff=guide)
 }

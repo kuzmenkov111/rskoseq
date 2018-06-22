@@ -9,10 +9,11 @@
 #' @param guide_gff The file path of guide gff.
 #' @param res_dir output directory path, the default is 'paste0(dirname(bamdir), "/res_stringtie")'
 #' @param ... additional options of stringtie. E.g. "-e"
-#' @examples #
+#' @examples
+#' ##
 #' # bamdir <- "~/pub/sampledata/rnaseq/project1/test.h2/res_hisat2"
-#' # guide <- "~/db/index/hisat2_idx/Cricetulus_griseus_crigri.CriGri_1.0.90.gff3"
-#' # rep_stringtie(bamdir=bamdir, guide_gff=guide, ... = "-p 8")
+#' # guide <- "~/db/index/hisat2_idx/CriGri_1.0.ens.add.gff"
+#' # rep_stringtie(bamdir=bamdir, guide_gff=guide)
 #' @importFrom utils tail write.table read.table
 #' @export
 rep_stringtie <- function(bamdir,
@@ -56,7 +57,7 @@ rep_stringtie <- function(bamdir,
     add_op <- ""
   }
 
-  # stringtie execution
+  # stringtie execution ----
   ## commando log file create ----
   datestrings <- gsub(":", ".", gsub(" ", "_", date()))
   path_comlog <- paste0(dirname(bamdir),"/stringtie_", datestrings,"_log.txt")
@@ -70,6 +71,8 @@ rep_stringtie <- function(bamdir,
   cores <- parallel::detectCores()
 
   ## execute ----
+  writeLines("# assembled transcripts ", con)
+
   for(i in seq_along(bamfls)){
     com <- paste("stringtie -p", cores, bamfls[i], "-G", guide_gff, "-o", res_gff[i], add_op, sep = " ")
     cat(paste0(com, " \n"))
@@ -87,11 +90,12 @@ rep_stringtie <- function(bamdir,
   write.table(resgff_dat, out_f, sep="\t", quote=F, row.names = F, col.names = F)
 
   ## stringtie --merge ----
-  com2 <- paste0("stringtie --merge -G ", guide_gff, " -o ", res_dir, "/merged.gff ", out_f)
+  com2 <- paste("stringtie --merge -G", guide_gff, "-o", paste0(res_dir, "/merged.gff"), out_f)
+  cat(paste0(com2, " \n"))
   system(com2, wait = T)
 
   ## over write command log ----
-  writeLines(paste0("# stringtie --merge \n", com2), con)
+  writeLines(paste0("\n# stringtie --merge \n", com2), con)
 
   # stringtie execution using merged gff
   ## define output files ----
@@ -100,7 +104,7 @@ rep_stringtie <- function(bamdir,
   res_ballgown <- paste0(res_dir, "/ballgown/", smps)
   res_tab <- paste0(res_dir, "/tab/", smps, ".tab")
   ## replicate execution ----
-  writeLines("# stringtie -eb", con)
+  writeLines("\n# stringtie -eb", con)
   for(i in seq_along(bamfls)){
     ## create ballgown directory
     if(!file.exists(res_ballgown[i])){
@@ -108,44 +112,126 @@ rep_stringtie <- function(bamdir,
     }
     ## command of 'stringtie -eb'
     com3 <-
-      paste0("stringtie -p ", cores,
-             " ", bamfls[i],
-             " -e ",
-             " -A ", res_tab[i],
-             " -b ", res_ballgown[i],
-             " -G ", mgff,
-             " -o ", res_mgff[i])
+      paste("stringtie -p", cores,
+             bamfls[i],
+             "-e",
+             "-A", res_tab[i],
+             "-b", res_ballgown[i],
+             "-G", mgff,
+             "-o", res_mgff[i])
     cat(paste0(com3, " \n"))
-    system(com3)
+    system(com3, wait = T)
 
     ## write command log ----
-    writeLines(com, con)
+    writeLines(com3, con)
   }
   close(con)
 
-  # create fpkm and cov table from t_data.ctab files ----
-  ballgown_smp <- paste0(res_dir, "/ballgown/", smps)
-  t_dats <- lapply(ballgown_smp, function(x){
-    smp <- sapply(strsplit(x, "/"), function(x)tail(x, 1))
-    read.table(paste0(x,"/t_data.ctab"), sep="\t", header = T, stringsAsFactors = F)
+  # modified merged gff ----
+  dat <- read.table(mgff, header = F, sep = "\t", stringsAsFactors = F)
+  v9 <- strsplit(dat$V9, "; ")
+  tid <- sub("transcript:","", sub("transcript_id ", "", sapply(v9, function(x)x[grep("transcript_id", x)])))
+  rgid <- sapply(v9, function(x){
+    rg <- gsub("ref_gene_id gene:|;$", "", x[grep("^ref_gene_id", x)])
+    ifelse(identical(rg, character(0)), NA, rg)
+  } )
+  gid <- sub("gene_id ", "",sapply(v9, function(x)x[grep("^gene_id", x)]))
+  gnm <- sapply(v9, function(x){
+    nm <- sub("gene_name ","",x[grep("^gene_name", x)])
+    ifelse(identical(nm, character(0)), NA, nm)
   })
-  cov_list <- lapply(t_dats, function(x)x[c("t_name", "cov")])
-  fpkm_list <- lapply(t_dats, function(x)x[c("t_name", "FPKM")])
-  invisible(lapply(seq_along(cov_list), function(i) names(cov_list[[i]])[[2]] <<- smps[i]))
-  invisible(lapply(seq_along(fpkm_list), function(i) names(fpkm_list[[i]])[[2]] <<- smps[i]))
+  mmgff <- dat %>% mutate(tid, rgid, gid, gnm)
 
-  f <- function(x, y)dplyr::full_join(x, y, by="t_name")
-  fpkm <- Reduce(f, fpkm_list)
-  cov <- Reduce(f, cov_list)
+  # create fpkm and cov table from Gene abundances files with the -A option ----
+  ## read gene abundances files ----
+  tabs <- lapply(res_tab, function(x){
+    read.table(x, sep="\t", header = T, stringsAsFactors = F)
+  })
 
-  # output file ----
+  gfpkm_list <- lapply(seq_along(tabs), function(i){
+    tabs[[i]][c("Gene.ID", "FPKM")] %>%
+      setNames(., c("Gene.ID", smps[i])) %>%
+      arrange(Gene.ID)
+    })
+  gcov_list <- lapply(seq_along(tabs), function(i){
+    tabs[[i]][c("Gene.ID", "Coverage")] %>%
+      setNames(., c("Gene.ID", smps[i])) %>%
+      arrange(Gene.ID)
+  })
+
+
+
+
+  ## merge gene abundances files ----
+  Gene.ID <- NULL; Gene.Name <- NULL; Ref.Gene.ID <- NULL;  Reference <- NULL; Start <- NULL; Strand <- NULL; End <- NULL
+  #f <- function(x, y)dplyr::full_join(x, y, by = c("Gene.ID","Gene.Name", "Reference", "Strand", "Start", "End"))
+  f <- function(x, y)dplyr::full_join(x, y, by="Gene.ID")
+  gfpkm <- Reduce(f, gfpkm_list) %>%
+    left_join(tabs[[1]][c("Gene.ID","Gene.Name", "Reference", "Strand", "Start", "End")], ., by="Gene.ID") %>%
+    mutate(Gene.ID = sub("gene:", "", Gene.ID)) %>%
+    mutate(Ref.Gene.ID=replace(Gene.ID,
+                               grepl("MSTRG.", Gene.ID),
+                               mmgff$rgid[match(grep("MSTRG.", Gene.ID, value = T), mmgff$gid)])) %>%
+    mutate(Ref.Gene.ID=ifelse(is.na(Ref.Gene.ID), Gene.ID, Ref.Gene.ID)) %>%
+    arrange(Reference, Start, Ref.Gene.ID) %>%
+    select(Ref.Gene.ID, Gene.ID, Gene.Name, Reference, Strand, Start, End, smps)
+
+  gcov <- Reduce(f, gcov_list) %>%
+    left_join(tabs[[1]][c("Gene.ID","Gene.Name", "Reference", "Strand", "Start", "End")], ., by="Gene.ID") %>%
+    mutate(Gene.ID = sub("gene:", "", Gene.ID)) %>%
+    mutate(Ref.Gene.ID=replace(Gene.ID,
+                               grepl("MSTRG.", Gene.ID),
+                               mmgff$rgid[match(grep("MSTRG.", Gene.ID, value = T), mmgff$gid)])) %>%
+    mutate(Ref.Gene.ID=ifelse(is.na(Ref.Gene.ID), Gene.ID, Ref.Gene.ID)) %>%
+    mutate(gene_name = mmgff$gnm[match(Ref.Gene.ID, mmgff$rgid)]) %>%
+    arrange(Reference, Start, Ref.Gene.ID) %>%
+    select(Ref.Gene.ID, Gene.ID, Gene.Name, Reference, Strand, Start, End, smps)
+
+
+  ## output file ----
   prjn <- basename(dirname((dirname(bamdir))))
   alnd <- basename(dirname(bamdir))
-  fpkmout <- paste0(res_dir, "/", prjn, "_", alnd, "_FPKM.txt")
-  covout <- paste0(res_dir, "/", prjn, "_", alnd, "_cov.txt")
+  gfpkmout <- paste0(res_dir, "/", prjn, "_", alnd, "_g_FPKM.txt")
+  gcovout <- paste0(res_dir, "/", prjn, "_", alnd, "_g_cov.txt")
 
-  write.table(fpkm, fpkmout, quote = F, sep = "\t", row.names = F, col.names = T)
-  write.table(cov, covout, quote = F, sep = "\t", row.names = F, col.names = T)
+  write.table(gfpkm, gfpkmout, quote = F, sep = "\t", row.names = F, col.names = T)
+  write.table(gcov, gcovout, quote = F, sep = "\t", row.names = F, col.names = T)
+
+
+  # create fpkm and cov table from transcript abundances files with -b option ----
+  ## read transcript abundances files ----
+  t_dats <- lapply(res_ballgown, function(x){
+    read.table(paste0(x,"/t_data.ctab"), sep="\t", header = T, stringsAsFactors = F)
+  })
+  tcov_list <- lapply(t_dats, function(x)x[c("t_name", "gene_id", "gene_name", "cov")])
+  tfpkm_list <- lapply(t_dats, function(x)x[c("t_name", "gene_id", "gene_name", "FPKM")])
+  invisible(lapply(seq_along(tcov_list), function(i) names(tcov_list[[i]])[[4]] <<- smps[i]))
+  invisible(lapply(seq_along(tfpkm_list), function(i) names(tfpkm_list[[i]])[[4]] <<- smps[i]))
+
+  ## merge ----
+  t_name <- NULL; gene_id <- NULL; gene_name <- NULL
+  f <- function(x, y)dplyr::full_join(x, y, by=c("t_name", "gene_id", "gene_name"))
+  tfpkm <- Reduce(f, tfpkm_list) %>%
+    mutate(t_name=sub("transcript:", "", t_name), gene_id=sub("gene:","", gene_id)) %>%
+    mutate(rgid = mmgff$rgid[match(t_name, mmgff$tid)]) %>%
+    mutate(rgid = ifelse(is.na(rgid), gene_id, rgid)) %>%
+    select(t_name, gene_id, rgid, gene_name, smps)
+
+  tcov <- Reduce(f, tcov_list) %>%
+    mutate(t_name=sub("transcript:", "", t_name), gene_id=sub("gene:","", gene_id)) %>%
+    mutate(rgid = mmgff$rgid[match(t_name, mmgff$tid)]) %>%
+    mutate(rgid = ifelse(is.na(rgid), gene_id, rgid)) %>%
+    select(t_name, gene_id, rgid, gene_name, smps)
+
+  ## output file ----
+  prjn <- basename(dirname((dirname(bamdir))))
+  alnd <- basename(dirname(bamdir))
+  fpkmout <- paste0(res_dir, "/", prjn, "_", alnd, "_t_FPKM.txt")
+  covout <- paste0(res_dir, "/", prjn, "_", alnd, "_t_cov.txt")
+
+  write.table(tfpkm, fpkmout, quote = F, sep = "\t", row.names = F, col.names = T)
+  write.table(tcov, covout, quote = F, sep = "\t", row.names = F, col.names = T)
+
 
 }
 
